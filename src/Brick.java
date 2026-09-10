@@ -1,2 +1,1 @@
-public record Brick(int id, int x, int y, int z) {
-}
+public record Brick(int id, int x, int y, int z) {}

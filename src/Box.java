@@ -3,15 +3,17 @@ import java.util.HashMap;
 public class Box {
     private Brick[] placed_bricks;
     private Brick[][][] grid;
+    private final int size;
     public Box(int size) {
         if (size <= 0 || size % 2 == 0) {
             throw new IllegalArgumentException();
         }
-        grid = new Brick[size][size][size];
+        this.size = size;
+        this.grid = new Brick[size][size][size];
     }
     public void remove_brick(Brick brick) {}
-    public void place_brick(Brick brick, HashMap<Character, Character> orientation, int x, int y, int z) {}
-    private void place_part(Brick brick, int x, int y, int z) {}
+    public boolean place_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {return false;}
+    private boolean place_part(Brick brick, Position position) {return false;}
     public String print_box() {
         return "";
     }
@@ -26,5 +28,8 @@ public class Box {
     }
     public void set_grid(Brick[][][] grid) {
         this.grid = grid;
+    }
+    public int get_size() {
+        return size;
     }
 }
