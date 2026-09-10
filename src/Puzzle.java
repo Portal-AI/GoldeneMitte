@@ -141,4 +141,14 @@ public final class Puzzle {
         int x = numbers[0], y = numbers[1], z = numbers[2];
         return new Brick(id, x, y, z);
     }
+
+    public static Brick[] parse_multiple_bricks_string(String multiple_bricks_string) {
+        String regex = "\\R";
+        String[] brick_strings = multiple_bricks_string.split(regex);
+        Brick[] bricks = new Brick[brick_strings.length];
+        for (int i = 0; i < bricks.length; i++) {
+            bricks[i] = parse_brick_string(i, brick_strings[i]);
+        }
+        return bricks;
+    }
 }
