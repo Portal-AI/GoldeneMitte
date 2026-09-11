@@ -43,7 +43,7 @@ public final class Puzzle {
             return true;
         }
         Position next_pos = next_position(box, position);
-        if (next_pos.x() == 0 && next_pos.y() == 0 && next_pos.z() == 0) {
+        if (Puzzle.position_outside_box(box, next_pos)) {
             return false;
         }
         for (int i = 0; i < bricks.size(); i++) {
@@ -64,11 +64,13 @@ public final class Puzzle {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
         }
         x++;
-        if(x == size){x = 0;}
-        if(x == 0){y++;}
-        if(y == size){y = 0;}
-        if(y == 0){z++;}
-        if(z == size){z = 0;}
+        if (x == size) {
+            x = 0;
+            y++;
+        }
+        if (y == size) {
+            y = 0; z++;
+        }
         return new Position(x,y,z);
     }
 //    prev_position is currently not used
