@@ -6,7 +6,7 @@ public final class FileManager {
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
             while ((line = br.readLine()) != null){
-                sb.append(line).append(" ");
+                sb.append(line).append("\n");
             }
         }
         catch (IOException error){

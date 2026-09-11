@@ -144,7 +144,7 @@ public final class Puzzle {
     }
 
     public static Brick[] parse_multiple_bricks_string(String multiple_bricks_string) {
-        String regex = "\\R";
+        String regex = "\r?\n";
         String[] brick_strings = multiple_bricks_string.split(regex);
         Brick[] bricks = new Brick[brick_strings.length];
         for (int i = 0; i < bricks.length; i++) {
