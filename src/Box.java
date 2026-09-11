@@ -13,7 +13,7 @@ public class Box {
         }
         this.size = size;
         this.grid = new Brick[size][size][size];
-        gold_brick_position = new Position(size % 2, size % 2, size % 2);
+        gold_brick_position = new Position(size / 2, size / 2, size / 2);
     }
     public void remove_brick(Brick brick) {
         placed_bricks.remove(brick);
