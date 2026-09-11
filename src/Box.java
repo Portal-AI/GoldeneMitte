@@ -25,10 +25,53 @@ public class Box {
             }
         }
     }
-    public boolean place_brick(Brick brick, Map<Character, Character> orientation, Position position) {
+    public boolean place_brick(Brick brick, Map orientation, Position position) {
+        int orientation_x = get_orientation((Character) orientation.get('x'), position);
+        int orientation_y = get_orientation((Character) orientation.get('y'), position);
+        int orientation_z = get_orientation((Character) orientation.get('z'), position);
+        int start_x = position.x();
+        int start_y = position.y();
+        int start_z = position.z();
 
-        return false;
+        for(int x=start_x; x<start_x+orientation_x; x++){
+            for(int y=start_y; y<start_y+orientation_y; y++){
+                for(int z=start_z; z<start_z+orientation_z; z++){
+                    Position pos = new Position(x, y, z);
+                    if(!place_part(brick, pos)) return false;
+                }
+            }
+        }
+
+        for(int x=start_x; x<start_x+orientation_x; x++){
+            for(int y=start_y; y<start_y+orientation_y; y++){
+                for(int z=start_z; z<start_z+orientation_z; z++){
+                    grid[x][y][z] = brick;
+                }
+            }
+        }
+        if (placed_bricks == null) {
+            placed_bricks = new Stack<>();
+        }
+        placed_bricks.push(brick);
+        return true;
     }
+
+    private int get_orientation(Character character, Position position) {
+        int x = position.x();
+        int y = position.y();
+        int z = position.z();
+        switch (character){
+            case 'x':
+                return x;
+            case 'y':
+                 return y;
+            case 'z':
+                return z;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
     private boolean place_part(Brick brick, Position position) {
         int x = position.x();
         int y = position.y();
@@ -39,7 +82,6 @@ public class Box {
 
         if(gold_brick_position.x() == x && gold_brick_position.y() == y && gold_brick_position.z() == z) return false;
 
-        grid[x][y][z] = brick;
         return true;
     }
 
@@ -47,10 +89,10 @@ public class Box {
         return "";
     }
 
-    public Brick[] get_placed_bricks() {
+    public Stack<Brick> get_placed_bricks() {
         return placed_bricks;
     }
-    public void set_placed_bricks(Brick[] bricks) {
+    public void set_placed_bricks(Stack<Brick> bricks) {
         placed_bricks = bricks;
     }
     public Brick[][][] get_grid() {
