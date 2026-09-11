@@ -26,9 +26,9 @@ public class Box {
         }
     }
     public boolean place_brick(Brick brick, Map orientation, Position position) {
-        int orientation_x = get_orientation((Character) orientation.get('x'), position);
-        int orientation_y = get_orientation((Character) orientation.get('y'), position);
-        int orientation_z = get_orientation((Character) orientation.get('z'), position);
+        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
+        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
+        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
         int start_x = position.x();
         int start_y = position.y();
         int start_z = position.z();
@@ -56,10 +56,10 @@ public class Box {
         return true;
     }
 
-    private int get_orientation(Character character, Position position) {
-        int x = position.x();
-        int y = position.y();
-        int z = position.z();
+    private int get_orientation(Character character, Brick brick) {
+        int x = brick.x();
+        int y = brick.y();
+        int z = brick.z();
         switch (character){
             case 'x':
                 return x;
@@ -73,12 +73,11 @@ public class Box {
     }
 
     private boolean place_part(Brick brick, Position position) {
+        if(Puzzle.position_outside_box(this, position)) return false;
         int x = position.x();
         int y = position.y();
         int z = position.z();
         if(grid[x][y][z] != null ) return false;
-
-        if(Puzzle.position_outside_box(this, position)) return false;
 
         if(gold_brick_position.x() == x && gold_brick_position.y() == y && gold_brick_position.z() == z) return false;
 
@@ -86,7 +85,34 @@ public class Box {
     }
 
     public String print_box() {
-        return "";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Box Size: ").append(size).append("x").append(size).append("x").append(size).append("\n");
+        sb.append("Gold Brick Position: (")
+                .append(gold_brick_position.x()).append(", ")
+                .append(gold_brick_position.y()).append(", ")
+                .append(gold_brick_position.z()).append(")\n\n");
+
+        for (int z = 0; z < size; z++) {
+            sb.append("Layer Z = ").append(z).append("\n");
+            for (int y = 0; y < size; y++) {
+                for (int x = 0; x < size; x++) {
+                    if (x == gold_brick_position.x() && y == gold_brick_position.y() && z == gold_brick_position.z()) {
+                        sb.append(" G ");
+                    }
+                    else if (grid[x][y][z] != null) {
+                        int id = grid[x][y][z].id();
+                        sb.append(" ").append(id).append(" ");
+                    }
+                    else {
+                        sb.append(" . ");
+                    }
+                }
+                sb.append("\n");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
     public Stack<Brick> get_placed_bricks() {
