@@ -2,6 +2,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 
 public final class Puzzle {
+    @SuppressWarnings("unchecked")
     public static final HashMap<Character, Character>[] orientations = new HashMap[]{
             new HashMap<Character, Character>(){{
                 put('x', 'x');
@@ -79,7 +80,7 @@ public final class Puzzle {
         if(z < 0){z=size-1;}
         return new Position(x,y,z);
     }
-    private static boolean position_outside_box(Box box, Position position) {
+    public static boolean position_outside_box(Box box, Position position) {
         if (position.x() < 0 || position.y() < 0 || position.z() < 0) {
             return true;
         }
