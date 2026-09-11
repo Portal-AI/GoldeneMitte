@@ -3,7 +3,7 @@ import java.util.Map;
 import java.util.Stack;
 
 public class Box {
-    private Stack<Brick> placed_bricks;
+    private Stack<Brick> placed_bricks = new Stack<>();
     private Brick[][][] grid;
     private final int size;
     private Position gold_brick_position;
@@ -48,9 +48,6 @@ public class Box {
                     grid[x][y][z] = brick;
                 }
             }
-        }
-        if (placed_bricks == null) {
-            placed_bricks = new Stack<>();
         }
         placed_bricks.push(brick);
         return true;
