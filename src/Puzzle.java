@@ -42,9 +42,11 @@ public final class Puzzle {
         if (bricks.isEmpty()) {
             return true;
         }
-        Position next_pos = next_position(box, position);
-        if (Puzzle.position_outside_box(box, next_pos)) {
+        if (Puzzle.position_outside_box(box, position)) {
             return false;
+        }
+        if(!box.is_empty(position)){
+            return solve_puzzle(box, bricks, next_position(box, position));
         }
         for (int i = 0; i < bricks.size(); i++) {
             Brick brick = bricks.get(i);
@@ -56,7 +58,7 @@ public final class Puzzle {
 
             bricks.add(i, brick);
         }
-        return solve_puzzle(box, bricks, next_position(box, position));
+        return false;
     }
     private static Position next_position(Box box, Position position) {
         int x = position.x(), y = position.y(), z = position.z(), size = box.get_size();

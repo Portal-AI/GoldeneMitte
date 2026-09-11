@@ -71,14 +71,15 @@ public class Box {
 
     private boolean place_part(Brick brick, Position position) {
         if(Puzzle.position_outside_box(this, position)) return false;
+        return is_empty(position);
+    }
+
+    public boolean is_empty(Position position) {
         int x = position.x();
         int y = position.y();
         int z = position.z();
-        if(grid[x][y][z] != null ) return false;
-
-        if(gold_brick_position.x() == x && gold_brick_position.y() == y && gold_brick_position.z() == z) return false;
-
-        return true;
+        if(position.equals(gold_brick_position)) return false;
+        return grid[x][y][z] == null;
     }
 
     public String print_box() {
