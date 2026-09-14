@@ -1,3 +1,5 @@
+package GoldeneMitte;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -81,9 +83,9 @@ public class Box {
         if(position.equals(gold_brick_position)) return false;
         return grid[x][y][z] == null;
     }
-    @Overload
     public boolean is_empty(int x, int y, int z){
-        if(position.equals(gold_brick_position)) return false;
+        int g = size/2;
+        if(x == g && y == g && z == g) return false;
         return grid[x][y][z] == null;
     }
 

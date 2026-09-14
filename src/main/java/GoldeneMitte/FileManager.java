@@ -1,3 +1,5 @@
+package GoldeneMitte;
+
 import java.io.*;
 
 public final class FileManager {

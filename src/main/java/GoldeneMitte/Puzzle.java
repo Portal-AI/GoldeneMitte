@@ -1,5 +1,8 @@
+package GoldeneMitte;
+
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public final class Puzzle {
     @SuppressWarnings("unchecked")
