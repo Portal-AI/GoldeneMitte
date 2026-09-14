@@ -1,7 +1,6 @@
 package GoldeneMitte;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -30,50 +29,46 @@ public class Box {
     }
 
     public void remove_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
-        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
-        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
-        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
-        int start_x = position.x();
-        int start_y = position.y();
-        int start_z = position.z();
-
-        for(int x=start_x; x<start_x+orientation_x; x++){
-            for(int y=start_y; y<start_y+orientation_y; y++){
-                for(int z=start_z; z<start_z+orientation_z; z++){
-                    if(grid[x][y][z] == brick) grid[x][y][z] = null;
-                }
-            }
+        Position[] cells = get_cells_for_brick(brick, orientation, position);
+        for (Position cell: cells){
+            if(grid[cell.x()][cell.y()][cell.z()] == brick) grid[cell.x()][cell.y()][cell.z()] = null;
         }
     }
     public boolean place_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
-        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
-        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
-        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
-        int start_x = position.x();
-        int start_y = position.y();
-        int start_z = position.z();
+        Position[] cells = get_cells_for_brick(brick, orientation, position);
 
-        for(int x=start_x; x<start_x+orientation_x; x++){
-            for(int y=start_y; y<start_y+orientation_y; y++){
-                for(int z=start_z; z<start_z+orientation_z; z++){
-                    Position pos = new Position(x, y, z);
-                    if(!position_free(pos)) return false;
-                }
-            }
+        for (Position cell: cells){
+            if(!cell_free(cell)) return false;
+        }
+        for (Position cell: cells){
+            grid[cell.x()][cell.y()][cell.z()] = brick;
         }
 
-        for(int x=start_x; x<start_x+orientation_x; x++){
-            for(int y=start_y; y<start_y+orientation_y; y++){
-                for(int z=start_z; z<start_z+orientation_z; z++){
-                    grid[x][y][z] = brick;
-                }
-            }
-        }
         placed_bricks.push(brick);
         return true;
     }
+    private Position[] get_cells_for_brick(Brick brick, HashMap<Character, Character> orientation, Position position){
+        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
+        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
+        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
 
-    public Position next_position(Position position) {
+        Position[] cells = new Position[brick.x()*brick.y()*brick.z()];
+        int dx, dy, dz, idx;
+        for(int x=position.x(); x<position.x()+orientation_x; x++){
+            for(int y=position.y(); y<position.y()+orientation_y; y++){
+                for(int z=position.z(); z<position.z()+orientation_z; z++){
+                    dx = x-position.x();
+                    dy = y-position.y();
+                    dz = z-position.z();
+                    idx = dz * orientation_y * orientation_x + dy * orientation_x + dx;
+                    cells[idx] = new Position(x,y,z);
+                }
+            }
+        }
+        return cells;
+    }
+
+    public Position next_cell(Position position) {
         int x = position.x(), y = position.y(), z = position.z();
         if (position_outside_box(position)) {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
@@ -88,7 +83,7 @@ public class Box {
         }
         return new Position(x,y,z);
     }
-    public Optional<Position> next_free_position(Position position){
+    public Optional<Position> next_free_cell(Position position){
         int x = position.x(), y = position.y(), z = position.z();
         if (position_outside_box(position)) {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
@@ -109,7 +104,7 @@ public class Box {
         return Optional.of(new Position(x,y,z));
     }
     //    prev_position is currently not used
-    public Position prev_position(Position position) {
+    public Position prev_cell(Position position) {
         int x = position.x(), y = position.y(), z = position.z();
         x--;
         if(x < 0){x=size-1; y--;}
@@ -139,7 +134,7 @@ public class Box {
         };
     }
 
-    private boolean position_free(Position position) {
+    private boolean cell_free(Position position) {
         if(position_outside_box(position)) return false;
         return is_empty(position);
     }

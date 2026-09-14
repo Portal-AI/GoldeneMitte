@@ -62,12 +62,12 @@ public final class Puzzle {
 
             bricks.add(i, brick);
         }
-        return solve_puzzle(box, bricks, box.next_free_position(position));
+        return solve_puzzle(box, bricks, box.next_free_cell(position));
     }
     private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
         for(int i = 0; i < orientations.length; i++){
             if(box.place_brick(brick, orientations[i], position)){
-                Optional<Position> next = box.next_free_position(position);
+                Optional<Position> next = box.next_free_cell(position);
                 if(solve_puzzle(box, bricks, next)){
                     return true;
                 }
