@@ -75,7 +75,7 @@ public final class Puzzle {
         }
         return new Position(x,y,z);
     }
-    private static Position next_free_position(Box box, Position position){
+    private static Optional<Position> next_free_position(Box box, Position position){
         int x = position.x(), y = position.y(), z = position.z(), size = box.get_size();
         if (position_outside_box(box, position)) {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
@@ -89,11 +89,11 @@ public final class Puzzle {
             if (y == size) {
                 y = 0; z++;
             }
-        } while(!box.is_empty(x, y, z));
+        } while(z < size && !box.is_empty(x, y, z));
         if(z >= size){
-            throw new IllegalStateException(String.format("Next free Position (%d, %d, %d) is outside box of size %d", x,y,z,size))
+            return Optional.empty();
         }
-        return new Position(x,y,z);
+        return Optional.of(new Position(x,y,z));
     }
 //    prev_position is currently not used
     private static Position prev_position(Box box, Position position) {
