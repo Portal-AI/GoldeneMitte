@@ -39,6 +39,9 @@ public final class Puzzle {
             }},
     };
     public static boolean solve_puzzle(Box box, ArrayList<Brick> bricks) {
+        if (unsolvable(box, bricks)) {
+            return false;
+        }
         return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
     }
     private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Optional<Position> opt_position) {
@@ -48,83 +51,42 @@ public final class Puzzle {
         if (opt_position.isEmpty()) {
             return false;
         }
+        Position position = opt_position.get();
         for (int i = 0; i < bricks.size(); i++) {
             Brick brick = bricks.get(i);
             bricks.remove(i);
 
-            if(try_brick(box, bricks, brick, opt_position.get())){
+            if(try_brick(box, bricks, brick, position)){
                 return true;
             }
 
             bricks.add(i, brick);
         }
-        return solve_puzzle(box, bricks, next_free_position(box, opt_position.get()));
+        return solve_puzzle(box, bricks, box.next_free_position(position));
     }
     private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
         for(int i = 0; i < orientations.length; i++){
             if(box.place_brick(brick, orientations[i], position)){
-                Optional<Position> next = next_free_position(box, position);
+                Optional<Position> next = box.next_free_position(position);
                 if(solve_puzzle(box, bricks, next)){
                     return true;
                 }
                 else{
-                    box.remove_brick(brick);
+                    box.remove_brick(brick, orientations[i], position);
                 }
             }
         }
         return false;
     }
-    private static Position next_position(Box box, Position position) {
-        int x = position.x(), y = position.y(), z = position.z(), size = box.get_size();
-        if (position_outside_box(box, position)) {
-            throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
+    private static boolean unsolvable(Box box, ArrayList<Brick> bricks) {
+        int box_volume = box.get_size() * box.get_size() * box.get_size();
+        int volume_bricks = 0;
+        for(Brick brick : bricks){
+            volume_bricks += brick.x()*brick.y()*brick.z();
         }
-        x++;
-        if (x == size) {
-            x = 0;
-            y++;
-        }
-        if (y == size) {
-            y = 0; z++;
-        }
-        return new Position(x,y,z);
+        System.out.println(String.format("Boxvolume: %d, Brickvolume: %d", box_volume, volume_bricks));
+        return volume_bricks != box_volume - 1;
     }
-    private static Optional<Position> next_free_position(Box box, Position position){
-        int x = position.x(), y = position.y(), z = position.z(), size = box.get_size();
-        if (position_outside_box(box, position)) {
-            throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
-        }
-        do{
-            x++;
-            if (x == size) {
-                x = 0;
-                y++;
-            }
-            if (y == size) {
-                y = 0; z++;
-            }
-        } while(z < size && !box.is_empty(x, y, z));
-        if(z >= size){
-            return Optional.empty();
-        }
-        return Optional.of(new Position(x,y,z));
-    }
-//    prev_position is currently not used
-    private static Position prev_position(Box box, Position position) {
-        int x = position.x(), y = position.y(), z = position.z(), size = box.get_size();
-        x--;
-        if(x < 0){x=size-1; y--;}
-        if(y < 0){y=size-1; z--;}
-        if(z < 0){z=size-1;}
-        return new Position(x,y,z);
-    }
-    public static boolean position_outside_box(Box box, Position position) {
-        if (position.x() < 0 || position.y() < 0 || position.z() < 0) {
-            return true;
-        }
-        return position.x() >= box.get_size() || position.y() >= box.get_size() || position.z() >= box.get_size();
-    }
-//    next_orientation_index is currently not used
     private static int next_orientation_index(int orientation_index) {
         if (orientation_index < 0 || orientation_index >= orientations.length) {
             throw new IllegalArgumentException("Invalid orientation: " + orientation_index);

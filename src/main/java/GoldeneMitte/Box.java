@@ -1,6 +1,8 @@
 package GoldeneMitte;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 
 public class Box {
@@ -22,6 +24,22 @@ public class Box {
             for(int j=0; j<size; j++){
                 for(int k=0; k<size; k++){
                     if(grid[i][j][k] == brick) grid[i][j][k] = null;
+                }
+            }
+        }
+    }
+    public void remove_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
+        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
+        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
+        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
+        int start_x = position.x();
+        int start_y = position.y();
+        int start_z = position.z();
+
+        for(int x=start_x; x<start_x+orientation_x; x++){
+            for(int y=start_y; y<start_y+orientation_y; y++){
+                for(int z=start_z; z<start_z+orientation_z; z++){
+                    if(grid[x][y][z] == brick) grid[x][y][z] = null;
                 }
             }
         }
@@ -54,6 +72,60 @@ public class Box {
         return true;
     }
 
+    public Position next_position(Position position) {
+        int x = position.x(), y = position.y(), z = position.z();
+        if (position_outside_box(position)) {
+            throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
+        }
+        x++;
+        if (x == size) {
+            x = 0;
+            y++;
+        }
+        if (y == size) {
+            y = 0; z++;
+        }
+        return new Position(x,y,z);
+    }
+    public Optional<Position> next_free_position(Position position){
+        int x = position.x(), y = position.y(), z = position.z();
+        if (position_outside_box(position)) {
+            throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
+        }
+        do{
+            x++;
+            if (x == size) {
+                x = 0;
+                y++;
+            }
+            if (y == size) {
+                y = 0; z++;
+            }
+        } while(z < size && !is_empty(x, y, z));
+        if(z >= size){
+            return Optional.empty();
+        }
+        return Optional.of(new Position(x,y,z));
+    }
+    //    prev_position is currently not used
+    public Position prev_position(Position position) {
+        int x = position.x(), y = position.y(), z = position.z();
+        x--;
+        if(x < 0){x=size-1; y--;}
+        if(y < 0){y=size-1; z--;}
+        if(z < 0){z=size-1;}
+        return new Position(x,y,z);
+    }
+    public boolean position_outside_box(Position position) {
+        if (position.x() < 0 || position.y() < 0 || position.z() < 0) {
+            return true;
+        }
+        return position.x() >= size || position.y() >= size || position.z() >= size;
+    }
+//    next_orientation_index is currently not used
+
+
+
     private int get_orientation(Character character, Brick brick) {
         int x = brick.x();
         int y = brick.y();
@@ -71,7 +143,7 @@ public class Box {
     }
 
     private boolean position_free(Brick brick, Position position) {
-        if(Puzzle.position_outside_box(this, position)) return false;
+        if(position_outside_box(position)) return false;
         return is_empty(position);
     }
 
