@@ -1,45 +1,19 @@
 package GoldeneMitte;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 public final class Puzzle {
-    @SuppressWarnings("unchecked")
-    public static final HashMap<Character, Character>[] orientations = new HashMap[]{
-            new HashMap<Character, Character>(){{
-                put('x', 'x');
-                put('y', 'y');
-                put('z', 'z');
-            }},
-            new HashMap<Character, Character>(){{
-                put('x', 'y');
-                put('y', 'x');
-                put('z', 'z');
-            }},
-            new HashMap<Character, Character>(){{
-                put('x', 'z');
-                put('y', 'y');
-                put('z', 'x');
-            }},
-            new HashMap<Character, Character>(){{
-                put('x', 'x');
-                put('y', 'z');
-                put('z', 'y');
-            }},
-            new HashMap<Character, Character>(){{
-                put('x', 'z');
-                put('y', 'x');
-                put('z', 'y');
-            }},
-            new HashMap<Character, Character>(){{
-                put('x', 'y');
-                put('y', 'z');
-                put('z', 'x');
-            }},
-    };
+
+    public static final List<Map<Character, Character>> orientations = List.of(
+            Map.of('x', 'x', 'y', 'y', 'z', 'z'),
+            Map.of('x', 'y', 'y', 'x', 'z', 'z'),
+            Map.of('x', 'z', 'y', 'y', 'z', 'x'),
+            Map.of('x', 'x', 'y', 'z', 'z', 'y'),
+            Map.of('x', 'z', 'y', 'x', 'z', 'y'),
+            Map.of('x', 'y', 'y', 'z', 'z', 'x')
+    );
     public static boolean solve_puzzle(Box box, ArrayList<Brick> bricks) {
-        if (unsolvable(box, bricks)) {
+        if (unsolvable_from_start(box, bricks)) {
             return false;
         }
         return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
@@ -65,20 +39,20 @@ public final class Puzzle {
         return solve_puzzle(box, bricks, box.next_free_cell(position));
     }
     private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
-        for(int i = 0; i < orientations.length; i++){
-            if(box.place_brick(brick, orientations[i], position)){
+        for(Map<Character,Character> orientation : brick.orientations()) {
+            if(box.place_brick(brick, orientation, position)){
                 Optional<Position> next = box.next_free_cell(position);
                 if(solve_puzzle(box, bricks, next)){
                     return true;
                 }
                 else{
-                    box.remove_brick(brick, orientations[i], position);
+                    box.remove_brick(brick, orientation, position);
                 }
             }
         }
         return false;
     }
-    private static boolean unsolvable(Box box, ArrayList<Brick> bricks) {
+    private static boolean unsolvable_from_start(Box box, ArrayList<Brick> bricks) {
         int box_volume = box.get_size() * box.get_size() * box.get_size();
         int volume_bricks = 0;
         for(Brick brick : bricks){
@@ -87,14 +61,37 @@ public final class Puzzle {
         System.out.println(String.format("Boxvolume: %d, Brickvolume: %d", box_volume, volume_bricks));
         return volume_bricks != box_volume - 1;
     }
-    private static int next_orientation_index(int orientation_index) {
-        if (orientation_index < 0 || orientation_index >= orientations.length) {
-            throw new IllegalArgumentException("Invalid orientation: " + orientation_index);
+    private static ArrayList<Position> neighbors(Box box, Position position, boolean[][][] visited){
+        Position [] candidates = new Position[]{
+                new Position(position.x(), position.y(), position.z()),
+                new Position(position.x() + 1, position.y(), position.z()),
+                new Position(position.x(), position.y() + 1, position.z()),
+                new Position(position.x(), position.y(), position.z()+1),
+                new Position(position.x() - 1, position.y(), position.z()),
+                new Position(position.x(), position.y() - 1, position.z()),
+                new Position(position.x(), position.y(), position.z()-1),
+        };
+        ArrayList<Position> result = new ArrayList<>();
+        for(Position candidate : candidates){
+            if(box.position_outside_box(candidate)) continue;
+            if(!box.is_empty(candidate)) continue;
+            if(visited[candidate.x()][candidate.y()][candidate.z()]) continue;
+            visited[candidate.x()][candidate.y()][candidate.z()] = true;
+            result.add(candidate);
         }
-        if (orientation_index == orientations.length - 1) {
-            return 0;
-        }
-        return orientation_index + 1;
+        return result;
+    }
+
+    public static int get_orientation(Character character, Brick brick) {
+        int x = brick.x();
+        int y = brick.y();
+        int z = brick.z();
+        return switch (character) {
+            case 'x' -> x;
+            case 'y' -> y;
+            case 'z' -> z;
+            default -> throw new IllegalArgumentException();
+        };
     }
     public static Box parse_box_string(String box_string) {
         String regex = "\\s";

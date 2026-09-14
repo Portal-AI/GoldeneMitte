@@ -1,6 +1,6 @@
 package GoldeneMitte;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -28,13 +28,13 @@ public class Box {
         }
     }
 
-    public void remove_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
+    public void remove_brick(Brick brick, Map<Character, Character> orientation, Position position) {
         Position[] cells = get_cells_for_brick(brick, orientation, position);
         for (Position cell: cells){
             if(grid[cell.x()][cell.y()][cell.z()] == brick) grid[cell.x()][cell.y()][cell.z()] = null;
         }
     }
-    public boolean place_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
+    public boolean place_brick(Brick brick, Map<Character, Character> orientation, Position position) {
         Position[] cells = get_cells_for_brick(brick, orientation, position);
 
         for (Position cell: cells){
@@ -47,10 +47,10 @@ public class Box {
         placed_bricks.push(brick);
         return true;
     }
-    private Position[] get_cells_for_brick(Brick brick, HashMap<Character, Character> orientation, Position position){
-        int orientation_x = get_orientation((Character) orientation.get('x'), brick);
-        int orientation_y = get_orientation((Character) orientation.get('y'), brick);
-        int orientation_z = get_orientation((Character) orientation.get('z'), brick);
+    private Position[] get_cells_for_brick(Brick brick, Map<Character, Character> orientation, Position position){
+        int orientation_x = Puzzle.get_orientation(orientation.get('x'), brick);
+        int orientation_y = Puzzle.get_orientation(orientation.get('y'), brick);
+        int orientation_z = Puzzle.get_orientation(orientation.get('z'), brick);
 
         Position[] cells = new Position[brick.x()*brick.y()*brick.z()];
         int dx, dy, dz, idx;
@@ -122,17 +122,6 @@ public class Box {
 
 
 
-    private int get_orientation(Character character, Brick brick) {
-        int x = brick.x();
-        int y = brick.y();
-        int z = brick.z();
-        return switch (character) {
-            case 'x' -> x;
-            case 'y' -> y;
-            case 'z' -> z;
-            default -> throw new IllegalArgumentException();
-        };
-    }
 
     private boolean cell_free(Position position) {
         if(position_outside_box(position)) return false;
