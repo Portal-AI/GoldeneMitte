@@ -81,6 +81,11 @@ public class Box {
         if(position.equals(gold_brick_position)) return false;
         return grid[x][y][z] == null;
     }
+    @Overload
+    public boolean is_empty(int x, int y, int z){
+        if(position.equals(gold_brick_position)) return false;
+        return grid[x][y][z] == null;
+    }
 
     public String print_box() {
         StringBuilder sb = new StringBuilder();
