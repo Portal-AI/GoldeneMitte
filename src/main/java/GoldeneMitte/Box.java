@@ -1,6 +1,5 @@
 package GoldeneMitte;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -39,7 +38,7 @@ public class Box {
             for(int y=start_y; y<start_y+orientation_y; y++){
                 for(int z=start_z; z<start_z+orientation_z; z++){
                     Position pos = new Position(x, y, z);
-                    if(!place_part(brick, pos)) return false;
+                    if(!position_free(brick, pos)) return false;
                 }
             }
         }
@@ -71,7 +70,7 @@ public class Box {
         }
     }
 
-    private boolean place_part(Brick brick, Position position) {
+    private boolean position_free(Brick brick, Position position) {
         if(Puzzle.position_outside_box(this, position)) return false;
         return is_empty(position);
     }

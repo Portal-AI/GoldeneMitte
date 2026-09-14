@@ -39,27 +39,38 @@ public final class Puzzle {
             }},
     };
     public static boolean solve_puzzle(Box box, ArrayList<Brick> bricks) {
-        return solve_puzzle(box, bricks, new Position(0,0,0));
+        return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
     }
-    private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Position position) {
+    private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Optional<Position> opt_position) {
         if (bricks.isEmpty()) {
             return true;
         }
-        if (Puzzle.position_outside_box(box, position)) {
+        if (opt_position.isEmpty()) {
             return false;
-        }
-        if(!box.is_empty(position)){
-            return solve_puzzle(box, bricks, next_position(box, position));
         }
         for (int i = 0; i < bricks.size(); i++) {
             Brick brick = bricks.get(i);
             bricks.remove(i);
 
-            if(try_brick(box, bricks, brick, position)){
+            if(try_brick(box, bricks, brick, opt_position.get())){
                 return true;
             }
 
             bricks.add(i, brick);
+        }
+        return solve_puzzle(box, bricks, next_free_position(box, opt_position.get()));
+    }
+    private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
+        for(int i = 0; i < orientations.length; i++){
+            if(box.place_brick(brick, orientations[i], position)){
+                Optional<Position> next = next_free_position(box, position);
+                if(solve_puzzle(box, bricks, next)){
+                    return true;
+                }
+                else{
+                    box.remove_brick(brick);
+                }
+            }
         }
         return false;
     }
@@ -112,19 +123,6 @@ public final class Puzzle {
             return true;
         }
         return position.x() >= box.get_size() || position.y() >= box.get_size() || position.z() >= box.get_size();
-    }
-    private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
-        for(int i = 0; i < orientations.length; i++){
-            if(box.place_brick(brick, orientations[i], position)){
-                if(solve_puzzle(box, bricks, next_position(box, position))){
-                    return true;
-                }
-                else{
-                    box.remove_brick(brick);
-                }
-            }
-        }
-        return false;
     }
 //    next_orientation_index is currently not used
     private static int next_orientation_index(int orientation_index) {
