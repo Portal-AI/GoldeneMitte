@@ -9,7 +9,7 @@ public class Box {
     private Stack<Brick> placed_bricks = new Stack<>();
     private Brick[][][] grid;
     private final int size;
-    private Position gold_brick_position;
+    private final Position gold_brick_position;
     public Box(int size) {
         if (size <= 0 || size % 2 == 0) {
             throw new IllegalArgumentException();
@@ -28,6 +28,7 @@ public class Box {
             }
         }
     }
+
     public void remove_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
         int orientation_x = get_orientation((Character) orientation.get('x'), brick);
         int orientation_y = get_orientation((Character) orientation.get('y'), brick);
@@ -56,7 +57,7 @@ public class Box {
             for(int y=start_y; y<start_y+orientation_y; y++){
                 for(int z=start_z; z<start_z+orientation_z; z++){
                     Position pos = new Position(x, y, z);
-                    if(!position_free(brick, pos)) return false;
+                    if(!position_free(pos)) return false;
                 }
             }
         }
@@ -130,19 +131,15 @@ public class Box {
         int x = brick.x();
         int y = brick.y();
         int z = brick.z();
-        switch (character){
-            case 'x':
-                return x;
-            case 'y':
-                 return y;
-            case 'z':
-                return z;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return switch (character) {
+            case 'x' -> x;
+            case 'y' -> y;
+            case 'z' -> z;
+            default -> throw new IllegalArgumentException();
+        };
     }
 
-    private boolean position_free(Brick brick, Position position) {
+    private boolean position_free(Position position) {
         if(position_outside_box(position)) return false;
         return is_empty(position);
     }
