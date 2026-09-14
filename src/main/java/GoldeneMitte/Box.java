@@ -45,7 +45,7 @@ public class Box {
             }
         }
     }
-    public boolean place_brick(Brick brick, Map orientation, Position position) {
+    public boolean place_brick(Brick brick, HashMap<Character, Character> orientation, Position position) {
         int orientation_x = get_orientation((Character) orientation.get('x'), brick);
         int orientation_y = get_orientation((Character) orientation.get('y'), brick);
         int orientation_z = get_orientation((Character) orientation.get('z'), brick);
