@@ -17,33 +17,37 @@ public final class Puzzle {
             return false;
         }
         Map<Brick, Set<Integer>> distinct_bricks = distinct_bricks(bricks);
-        return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
+        return solve_puzzle(box, distinct_bricks, Optional.of(new Position(0,0,0)));
     }
-    private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Optional<Position> opt_position) {
-        if (bricks.isEmpty()) {
+    private static boolean solve_puzzle(Box box, Map<Brick, Set<Integer>> distinct_bricks, Optional<Position> opt_position) {
+        if (distinct_bricks.isEmpty()) {
             return true;
         }
         if (opt_position.isEmpty()) {
             return false;
         }
         Position position = opt_position.get();
-        for (int i = 0; i < bricks.size(); i++) {
-            Brick brick = bricks.get(i);
-            bricks.remove(i);
-
-            if(try_brick(box, bricks, brick, position)){
-                return true;
+        for (Brick brick: new ArrayList<>(distinct_bricks.keySet())) {
+            Set<Integer> ids = distinct_bricks.get(brick);
+            int id = ids.iterator().next();
+            ids.remove(id);
+            if (ids.isEmpty()) {
+                distinct_bricks.remove(brick);
             }
 
-            bricks.add(i, brick);
+            if(try_brick(box, distinct_bricks, new Brick(id, brick.x(), brick.y(), brick.z()), position)){
+                return true;
+            }
+            distinct_bricks.putIfAbsent(brick, new HashSet<>());
+            distinct_bricks.get(brick).add(id);
         }
-        return solve_puzzle(box, bricks, box.next_free_cell(position));
+        return false;
     }
-    private static boolean try_brick(Box box, ArrayList<Brick> bricks, Brick brick, Position position) {
+    private static boolean try_brick(Box box, Map<Brick, Set<Integer>> distinct_bricks, Brick brick, Position position) {
         for(Map<Character,Character> orientation : brick.orientations()) {
             if(box.place_brick(brick, orientation, position)){
                 Optional<Position> next = box.next_free_cell(position);
-                if(solve_puzzle(box, bricks, next)){
+                if(solve_puzzle(box, distinct_bricks, next)){
                     return true;
                 }
                 else{
@@ -52,6 +56,18 @@ public final class Puzzle {
             }
         }
         return false;
+    }
+
+    public static Map<Brick, Set<Integer>> distinct_bricks(List<Brick> bricks) {
+        Set<Integer> ids = new HashSet<>();
+        Map<Brick, Set<Integer>> result = new HashMap<>();
+        for (Brick brick : bricks) {
+            result.merge(brick, new HashSet<>(Set.of(brick.id())), (existing, incoming) -> {
+                existing.addAll(incoming);
+                return existing;
+            });
+        }
+        return result;
     }
     private static boolean unsolvable_from_start(Box box, ArrayList<Brick> bricks) {
         int box_volume = box.get_size() * box.get_size() * box.get_size();
@@ -79,17 +95,6 @@ public final class Puzzle {
             if(visited[candidate.x()][candidate.y()][candidate.z()]) continue;
             visited[candidate.x()][candidate.y()][candidate.z()] = true;
             result.add(candidate);
-        }
-        return result;
-    }
-    public static Map<Brick, Set<Integer>> distinct_bricks(List<Brick> bricks) {
-        Set<Integer> ids = new HashSet<>();
-        Map<Brick, Set<Integer>> result = new HashMap<>();
-        for (Brick brick : bricks) {
-            result.merge(brick, new HashSet<>(Set.of(brick.id())), (existing, incoming) -> {
-                existing.addAll(incoming);
-                return existing;
-            });
         }
         return result;
     }

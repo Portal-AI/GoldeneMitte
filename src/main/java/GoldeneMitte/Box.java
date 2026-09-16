@@ -9,6 +9,7 @@ public class Box {
     private Brick[][][] grid;
     private final int size;
     private final Position gold_brick_position;
+    private final Brick gold_brick = new Brick(-1, 1,1,1);
     public Box(int size) {
         if (size <= 0 || size % 2 == 0) {
             throw new IllegalArgumentException();
@@ -16,6 +17,7 @@ public class Box {
         this.size = size;
         this.grid = new Brick[size][size][size];
         gold_brick_position = new Position(size / 2, size / 2, size / 2);
+        this.grid[gold_brick_position.x()][gold_brick_position.y()][gold_brick_position.z()] = gold_brick;
     }
     public void remove_brick(Brick brick) {
         placed_bricks.remove(brick);
