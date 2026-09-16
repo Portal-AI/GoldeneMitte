@@ -141,36 +141,36 @@ public class Box {
         return grid[x][y][z] == null;
     }
 
-    public String print_box() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Box Size: ").append(size).append("x").append(size).append("x").append(size).append("\n");
-        sb.append("Gold Brick Position: (")
-                .append(gold_brick_position.x()).append(", ")
-                .append(gold_brick_position.y()).append(", ")
-                .append(gold_brick_position.z()).append(")\n\n");
-
-        for (int z = 0; z < size; z++) {
-            sb.append("Layer Z = ").append(z).append("\n");
-            for (int y = 0; y < size; y++) {
-                for (int x = 0; x < size; x++) {
-                    if (x == gold_brick_position.x() && y == gold_brick_position.y() && z == gold_brick_position.z()) {
-                        sb.append(" G ");
-                    }
-                    else if (grid[x][y][z] != null) {
-                        int id = grid[x][y][z].id();
-                        sb.append(" ").append(id).append(" ");
-                    }
-                    else {
-                        sb.append(" . ");
-                    }
-                }
-                sb.append("\n");
-            }
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
+//    public String print_box() {
+//        StringBuilder sb = new StringBuilder();
+//
+//        sb.append("Box Size: ").append(size).append("x").append(size).append("x").append(size).append("\n");
+//        sb.append("Gold Brick Position: (")
+//                .append(gold_brick_position.x()).append(", ")
+//                .append(gold_brick_position.y()).append(", ")
+//                .append(gold_brick_position.z()).append(")\n\n");
+//
+//        for (int z = 0; z < size; z++) {
+//            sb.append("Layer Z = ").append(z).append("\n");
+//            for (int y = 0; y < size; y++) {
+//                for (int x = 0; x < size; x++) {
+//                    if (x == gold_brick_position.x() && y == gold_brick_position.y() && z == gold_brick_position.z()) {
+//                        sb.append(" G ");
+//                    }
+//                    else if (grid[x][y][z] != null) {
+//                        int id = grid[x][y][z].id();
+//                        sb.append(" ").append(id).append(" ");
+//                    }
+//                    else {
+//                        sb.append(" . ");
+//                    }
+//                }
+//                sb.append("\n");
+//            }
+//            sb.append("\n");
+//        }
+//        return sb.toString();
+//    }
 
     public Stack<Brick> get_placed_bricks() {
         return placed_bricks;

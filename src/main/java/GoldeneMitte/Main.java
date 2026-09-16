@@ -15,6 +15,6 @@ public class Main {
         ArrayList<Brick> bricksList = new ArrayList<>(Arrays.asList(bricks));
         boolean is_solved = Puzzle.solve_puzzle(box, bricksList);
         System.out.println(is_solved);
-        System.out.println(box.print_box());
+//        System.out.println(box.print_box());
     }
 }

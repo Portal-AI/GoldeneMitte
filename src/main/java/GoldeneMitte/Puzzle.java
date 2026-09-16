@@ -16,6 +16,7 @@ public final class Puzzle {
         if (unsolvable_from_start(box, bricks)) {
             return false;
         }
+        Map<Brick, Integer> distinct_bricks = distinct_bricks(bricks);
         return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
     }
     private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Optional<Position> opt_position) {
@@ -81,7 +82,35 @@ public final class Puzzle {
         }
         return result;
     }
+    public static Map<Brick, Integer> distinct_bricks(ArrayList<Brick> bricks){
+        HashSet<Brick> seen_bricks = new HashSet<>();
+        HashMap<Brick, Integer> result = new HashMap<>();
+        for(Brick brick: bricks){
+            if(seen_bricks.add(brick)) result.put(brick, 1);
+            else{
+                result.put(brick, result.get(brick)+1);
+            }
+        }
+        return result;
+    }
 
+
+
+//    private static boolean unsolvable(Box box, ArrayList<Brick> outside_bricks){
+//
+//    }
+//    private int[] pocket_volumes(Box box){
+//        Optional<Position> current = box.next_free_cell(new Position(0,0,0));
+//        if(current.isEmpty()) return new int[]{0};
+//        boolean[][][] visited = new boolean[box.get_size()][box.get_size()][box.get_size()];
+//        ArrayList<Integer> result = new ArrayList<>();
+//        while(current.isPresent()){
+    ////            queue
+//            Position position = current.get();
+//            visited[position.x()][position.y()][position.z()] = true;
+//
+//        }
+//    }
     public static int get_orientation(Character character, Brick brick) {
         int x = brick.x();
         int y = brick.y();
@@ -124,7 +153,7 @@ public final class Puzzle {
             }
         }
         int x = numbers[0], y = numbers[1], z = numbers[2];
-        return new Brick(id, x, y, z);
+        return new Brick(x, y, z);
     }
 
     public static Brick[] parse_multiple_bricks_string(String multiple_bricks_string) {

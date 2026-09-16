@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public record Brick(int id, int x, int y, int z, List<Map<Character, Character>> orientations) {
+public record Brick(int x, int y, int z, List<Map<Character, Character>> orientations) {
 
-    Brick(int id, int x, int y, int z) {
-        this(id, x, y, z, getOrientations(x, y, z));
+    Brick(int x, int y, int z) {
+        this(x, y, z, getOrientations(x, y, z));
     }
 
     private static List<Map<Character, Character>> getOrientations(int x, int y, int z) {
