@@ -1,15 +1,29 @@
 package GoldeneMitte;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public record Brick(int x, int y, int z, List<Map<Character, Character>> orientations) {
+public record Brick(int id, int x, int y, int z, List<Map<Character, Character>> orientations) {
 
-    Brick(int x, int y, int z) {
-        this(x, y, z, getOrientations(x, y, z));
+    Brick(int id, int x, int y, int z) {
+        this(id, x, y, z, getOrientations(x, y, z));
+    }
+
+    private List<Integer> sortedDimensions(){
+        List<Integer> dims = new ArrayList<>(List.of(x,y,z));
+        Collections.sort(dims);
+        return dims;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Brick other)) return false;
+        return sortedDimensions().equals(other.sortedDimensions());
+    }
+
+    @Override
+    public int hashCode(){
+        return sortedDimensions().hashCode();
     }
 
     private static List<Map<Character, Character>> getOrientations(int x, int y, int z) {

@@ -16,7 +16,7 @@ public final class Puzzle {
         if (unsolvable_from_start(box, bricks)) {
             return false;
         }
-        Map<Brick, Integer> distinct_bricks = distinct_bricks(bricks);
+        Map<Brick, Set<Integer>> distinct_bricks = distinct_bricks(bricks);
         return solve_puzzle(box, bricks, Optional.of(new Position(0,0,0)));
     }
     private static boolean solve_puzzle(Box box, ArrayList<Brick> bricks, Optional<Position> opt_position) {
@@ -82,14 +82,14 @@ public final class Puzzle {
         }
         return result;
     }
-    public static Map<Brick, Integer> distinct_bricks(ArrayList<Brick> bricks){
-        HashSet<Brick> seen_bricks = new HashSet<>();
-        HashMap<Brick, Integer> result = new HashMap<>();
-        for(Brick brick: bricks){
-            if(seen_bricks.add(brick)) result.put(brick, 1);
-            else{
-                result.put(brick, result.get(brick)+1);
-            }
+    public static Map<Brick, Set<Integer>> distinct_bricks(List<Brick> bricks) {
+        Set<Integer> ids = new HashSet<>();
+        Map<Brick, Set<Integer>> result = new HashMap<>();
+        for (Brick brick : bricks) {
+            result.merge(brick, new HashSet<>(Set.of(brick.id())), (existing, incoming) -> {
+                existing.addAll(incoming);
+                return existing;
+            });
         }
         return result;
     }
@@ -153,7 +153,7 @@ public final class Puzzle {
             }
         }
         int x = numbers[0], y = numbers[1], z = numbers[2];
-        return new Brick(x, y, z);
+        return new Brick(id, x, y, z);
     }
 
     public static Brick[] parse_multiple_bricks_string(String multiple_bricks_string) {
