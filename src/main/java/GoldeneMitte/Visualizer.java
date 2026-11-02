@@ -1,0 +1,36 @@
+package GoldeneMitte;
+
+import GoldeneMitte.controller.VisualizerController;
+import GoldeneMitte.model.VoxelModel;
+import GoldeneMitte.view.MainView;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class Visualizer extends Application {
+    @Override
+    public void start(Stage stage) {
+        String text = FileManager.readFile("src/main/resources/input/raetsel4.txt");
+        String[] parts = text.trim().split("\\s+", 5);
+        String box_string = parts[0] + " " + parts[1] + " " + parts[2];
+        String bricks_string = parts[4];
+        Box box = Puzzle.parse_box_string(box_string);
+        Brick[] bricks = Puzzle.parse_multiple_bricks_string(bricks_string);
+        ArrayList<Brick> bricksList = new ArrayList<>(Arrays.asList(bricks));
+
+        boolean is_solved = Puzzle.solve_puzzle(box, bricksList);
+        System.out.println(is_solved);
+        System.out.println(box.print_box());
+
+        VoxelModel model = new VoxelModel(box);
+        MainView view = new MainView(model);
+        new VisualizerController(model, view);
+
+        stage.setTitle("Demo" + (is_solved ? "" : " (nicht gelöst)"));
+        stage.setScene(new Scene(view, 1200, 780));
+        stage.show();
+    }
+}
