@@ -1,8 +1,8 @@
 package GoldeneMitte.visualizer.model;
 
-import GoldeneMitte.Box;
-import GoldeneMitte.Brick;
-import GoldeneMitte.Position;
+import GoldeneMitte.core.Box;
+import GoldeneMitte.core.Brick;
+import GoldeneMitte.core.Position;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 

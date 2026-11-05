@@ -1,5 +1,9 @@
 package GoldeneMitte;
 
+import GoldeneMitte.core.Box;
+import GoldeneMitte.core.Brick;
+import GoldeneMitte.core.FileManager;
+import GoldeneMitte.core.Puzzle;
 import GoldeneMitte.visualizer.controller.VisualizerController;
 import GoldeneMitte.visualizer.model.VoxelModel;
 import GoldeneMitte.visualizer.view.MainView;

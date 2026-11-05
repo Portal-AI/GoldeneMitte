@@ -1,4 +1,4 @@
-package GoldeneMitte;
+package GoldeneMitte.core;
 
 import java.util.*;
 

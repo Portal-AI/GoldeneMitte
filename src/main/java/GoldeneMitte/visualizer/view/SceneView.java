@@ -1,6 +1,6 @@
 package GoldeneMitte.visualizer.view;
 
-import GoldeneMitte.Position;
+import GoldeneMitte.core.Position;
 import GoldeneMitte.visualizer.model.VoxelModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
