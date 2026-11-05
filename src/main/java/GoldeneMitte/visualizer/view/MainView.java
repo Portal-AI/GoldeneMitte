@@ -1,7 +1,9 @@
-package GoldeneMitte.view;
+package GoldeneMitte.visualizer.view;
 
-import GoldeneMitte.model.VoxelModel;
+import GoldeneMitte.visualizer.model.VoxelModel;
 import javafx.scene.layout.BorderPane;
+
+import java.util.function.IntConsumer;
 
 public class MainView extends BorderPane {
 
@@ -18,10 +20,6 @@ public class MainView extends BorderPane {
         setCenter(sceneView);
     }
 
-    public SidebarView getSidebar() {
-        return sidebar;
-    }
-
     public SceneView getSceneView() {
         return sceneView;
     }
@@ -29,5 +27,13 @@ public class MainView extends BorderPane {
     public void showSelection(Integer selected) {
         sidebar.showSelection(selected);
         sceneView.showSelection(selected);
+    }
+
+    public void setOnBrickClicked(IntConsumer handler) {
+        sidebar.setOnBrickClicked(handler);
+    }
+
+    public void setOnResetCameraRequested(Runnable handler) {
+        sceneView.setReset(handler);
     }
 }

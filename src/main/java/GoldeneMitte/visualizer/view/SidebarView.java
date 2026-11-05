@@ -1,6 +1,6 @@
-package GoldeneMitte.view;
+package GoldeneMitte.visualizer.view;
 
-import GoldeneMitte.model.VoxelModel;
+import GoldeneMitte.visualizer.model.VoxelModel;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -19,9 +19,8 @@ import java.util.function.IntConsumer;
 
 public class SidebarView extends VBox {
 
-    private static final String ROW_STYLE =
-            "-fx-background-color: rgba(15,23,42,0.5); -fx-border-color: #334155;"
-                    + "-fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;";
+    private static final String ROW_STYLE = "-fx-background-color: rgba(15,23,42,0.5); -fx-border-color: #334155;"
+            + "-fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;";
     private static final String ROW_STYLE_SELECTED =
             "-fx-background-color: rgba(59,130,246,0.25); -fx-border-color: #3b82f6;"
                     + "-fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;";
@@ -65,8 +64,10 @@ public class SidebarView extends VBox {
     private HBox createRow(int brickId, Color color, int cellCount) {
         Circle dot = new Circle(8, color);
         dot.setStroke(Color.web("#ffffff", 0.4));
+
         Label id = new Label("ID: " + (brickId == VoxelModel.GOLD_BRICK_ID ? "G" : brickId));
         id.setStyle("-fx-font-family: monospace; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;");
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Label cnt = new Label(cellCount + " Voxel");

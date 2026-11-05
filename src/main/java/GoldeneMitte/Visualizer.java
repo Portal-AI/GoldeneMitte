@@ -1,8 +1,8 @@
 package GoldeneMitte;
 
-import GoldeneMitte.controller.VisualizerController;
-import GoldeneMitte.model.VoxelModel;
-import GoldeneMitte.view.MainView;
+import GoldeneMitte.visualizer.controller.VisualizerController;
+import GoldeneMitte.visualizer.model.VoxelModel;
+import GoldeneMitte.visualizer.view.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;

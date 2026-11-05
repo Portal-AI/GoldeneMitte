@@ -1,4 +1,4 @@
-package GoldeneMitte.model;
+package GoldeneMitte.visualizer.model;
 
 import GoldeneMitte.Box;
 import GoldeneMitte.Brick;
