@@ -28,7 +28,7 @@ public class Visualizer extends Application {
         boolean is_solved = Puzzle.solvePuzzle(box, bricksList);
         System.out.println(is_solved);
         System.out.println(box.printBox());
-
+        FileManager.writeFile("src/main/resources/output/raetsel4.txt", box.printBox());
         VoxelModel model = new VoxelModel(box);
         MainView view = new MainView(model);
         new VisualizerController(model, view);

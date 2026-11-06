@@ -18,6 +18,11 @@ public final class FileManager {
         return sb.toString();
     }
     public static void writeFile(String fileName, String content) {
-
+        try (FileWriter fw = new FileWriter(fileName)) {
+            fw.write(content);
+        }
+        catch (IOException error){
+            throw new RuntimeException("Could not write in file: " + new File(fileName).getAbsolutePath(), error);
+        }
     }
 }
