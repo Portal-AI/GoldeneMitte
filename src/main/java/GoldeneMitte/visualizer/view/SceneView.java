@@ -31,8 +31,8 @@ public class SceneView extends StackPane {
     private final SubScene subScene;
     private final Button resetButton = new Button("Ansicht zurücksetzen");
 
-    private final PhongMaterial outlineMaterial = new PhongMaterial(Color.BLACK);
-    private final PhongMaterial dimmedEdgeMaterial = new PhongMaterial(Color.rgb(120, 120, 120, 0.4));
+    private final PhongMaterial outlineMaterial = new PhongMaterial(Theme.OUTLINE_EDGE);
+    private final PhongMaterial dimmedEdgeMaterial = new PhongMaterial(Theme.DIMMED_EDGE);
     private final List<VoxelNode> voxelNodes = new ArrayList<>();
 
     public SceneView(VoxelModel model, BrickStyles styles) {
@@ -63,18 +63,18 @@ public class SceneView extends StackPane {
         sceneRoot.getChildren().addAll(createLights());
 
         SubScene subScene= new SubScene(sceneRoot, 900, 700, true, SceneAntialiasing.BALANCED);
-        subScene.setFill(Color.web("#090d16"));
+        subScene.setFill(Theme.SUB_SCENE_COLOR);
         subScene.setCamera(camera);
         return subScene;
     }
 
     private List<Node> createLights(){
-        AmbientLight ambient = new AmbientLight(Color.gray(0.55));
-        PointLight keyLight  = new PointLight(Color.WHITE);
+        AmbientLight ambient = new AmbientLight(Theme.AMBIENT_COLOR);
+        PointLight keyLight  = new PointLight(Theme.KEY_LIGHT_COLOR);
         keyLight.setTranslateX(-10);
         keyLight.setTranslateY(-16);
         keyLight.setTranslateZ(-14);
-        PointLight fill = new PointLight(Color.web("#7dd3fc", 1.0).deriveColor(0, 1, 0.5, 1));
+        PointLight fill = new PointLight(Theme.POINT_LIGHT_COLOR_FILL);
         fill.setTranslateX(10);
         fill.setTranslateY(8);
         fill.setTranslateZ(-8);
@@ -89,7 +89,7 @@ public class SceneView extends StackPane {
 
     private void buildFloorGrid(int size) {
         double floorY = (size - 1) / 2.0 + 0.55;
-        PhongMaterial gridMat = new PhongMaterial(Color.web("#3b82f6", 0.6));
+        PhongMaterial gridMat = new PhongMaterial(Theme.FLOOR_COLOR);
         for (int row = 0; row <= size; row++) {
             double p = -size / 2.0 + row;
 

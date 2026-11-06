@@ -15,7 +15,7 @@ public class MainView extends BorderPane {
         sidebar = new SidebarView(model, styles);
         sceneView = new SceneView(model, styles);
 
-        setStyle("-fx-base: #1e293b; -fx-background: #0f172a;");
+        setStyle(Theme.MAIN_STYLE);
         setLeft(sidebar);
         setCenter(sceneView);
     }

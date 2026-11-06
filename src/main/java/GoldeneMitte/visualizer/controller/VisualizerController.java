@@ -2,9 +2,6 @@ package GoldeneMitte.visualizer.controller;
 
 import GoldeneMitte.visualizer.model.VoxelModel;
 import GoldeneMitte.visualizer.view.MainView;
-import GoldeneMitte.visualizer.view.SceneView;
-import javafx.scene.SubScene;
-import javafx.scene.input.MouseButton;
 
 public class VisualizerController {
     private final VoxelModel model;

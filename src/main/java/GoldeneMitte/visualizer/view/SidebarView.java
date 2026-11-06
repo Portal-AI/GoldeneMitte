@@ -18,13 +18,6 @@ import java.util.Map;
 import java.util.function.IntConsumer;
 
 public class SidebarView extends VBox {
-
-    private static final String ROW_STYLE = "-fx-background-color: rgba(15,23,42,0.5); -fx-border-color: #334155;"
-            + "-fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;";
-    private static final String ROW_STYLE_SELECTED =
-            "-fx-background-color: rgba(59,130,246,0.25); -fx-border-color: #3b82f6;"
-                    + "-fx-border-radius: 4; -fx-background-radius: 4; -fx-cursor: hand;";
-
     private final Map<Integer, HBox> rows = new HashMap<>();
     private IntConsumer onBrickClicked = id -> {};
 
@@ -32,7 +25,7 @@ public class SidebarView extends VBox {
         super(10);
 
         Label header = new Label("Bausteine (" + model.getBrickIds().size() + ")");
-        header.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #f1f5f9;");
+        header.setStyle(Theme.SIDEBAR_HEADER_STYLE);
 
         VBox list = new VBox(4);
         list.setPadding(new Insets(2));
@@ -50,7 +43,7 @@ public class SidebarView extends VBox {
         setPadding(new Insets(12));
         setPrefWidth(240);
         setMinWidth(240);
-        setStyle("-fx-background-color: #0f172a; -fx-border-color: #1e293b; -fx-border-width: 0 1 0 0;");
+        setStyle(Theme.SIDEBAR_STYLE);
     }
 
     public void setOnBrickClicked(IntConsumer handler) {
@@ -58,25 +51,25 @@ public class SidebarView extends VBox {
     }
 
     public void showSelection(Integer selected) {
-        rows.forEach((id, row) -> row.setStyle(id.equals(selected) ? ROW_STYLE_SELECTED : ROW_STYLE));
+        rows.forEach((id, row) -> row.setStyle(id.equals(selected) ? Theme.ROW_STYLE_SELECTED : Theme.ROW_STYLE));
     }
 
     private HBox createRow(int brickId, Color color, int cellCount) {
         Circle dot = new Circle(8, color);
-        dot.setStroke(Color.web("#ffffff", 0.4));
+        dot.setStroke(Theme.DOT_STROKE_COLOR);
 
         Label id = new Label("ID: " + (brickId == VoxelModel.GOLD_BRICK_ID ? "G" : brickId));
-        id.setStyle("-fx-font-family: monospace; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;");
+        id.setStyle(Theme.ID_LABEL_STYLE);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Label cnt = new Label(cellCount + " Voxel");
-        cnt.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+        Label labelCellCount = new Label(cellCount + " Voxel");
+        labelCellCount.setStyle(Theme.COUNT_LABEL_STYLE);
 
-        HBox row = new HBox(8, dot, id, spacer, cnt);
+        HBox row = new HBox(8, dot, id, spacer, labelCellCount);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(6, 8, 6, 8));
-        row.setStyle(ROW_STYLE);
+        row.setStyle(Theme.ROW_STYLE);
         row.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) onBrickClicked.accept(brickId);
         });
