@@ -5,22 +5,22 @@ import java.util.Optional;
 import java.util.Stack;
 
 public class Box {
-    private Stack<Brick> placed_bricks = new Stack<>();
+    private Stack<Brick> placedBricks = new Stack<>();
     private Brick[][][] grid;
     private final int size;
-    private final Position gold_brick_position;
-    private final Brick gold_brick = new Brick(-1, 1,1,1);
+    private final Position goldBrickPosition;
+    private final Brick goldBrick = new Brick(-1, 1,1,1);
     public Box(int size) {
         if (size <= 0 || size % 2 == 0) {
             throw new IllegalArgumentException();
         }
         this.size = size;
         this.grid = new Brick[size][size][size];
-        gold_brick_position = new Position(size / 2, size / 2, size / 2);
-        this.grid[gold_brick_position.x()][gold_brick_position.y()][gold_brick_position.z()] = gold_brick;
+        goldBrickPosition = new Position(size / 2, size / 2, size / 2);
+        this.grid[goldBrickPosition.x()][goldBrickPosition.y()][goldBrickPosition.z()] = goldBrick;
     }
-    public void remove_brick(Brick brick) {
-        placed_bricks.remove(brick);
+    public void removeBrick(Brick brick) {
+        placedBricks.remove(brick);
         for(int i=0; i<size; i++){
             for(int j=0; j<size; j++){
                 for(int k=0; k<size; k++){
@@ -30,39 +30,39 @@ public class Box {
         }
     }
 
-    public void remove_brick(Brick brick, Map<Character, Character> orientation, Position position) {
-        Position[] cells = get_cells_for_brick(brick, orientation, position);
+    public void removeBrick(Brick brick, Map<Character, Character> orientation, Position position) {
+        Position[] cells = getCellsForBrick(brick, orientation, position);
         for (Position cell: cells){
             if(grid[cell.x()][cell.y()][cell.z()] == brick) grid[cell.x()][cell.y()][cell.z()] = null;
         }
     }
-    public boolean place_brick(Brick brick, Map<Character, Character> orientation, Position position) {
-        Position[] cells = get_cells_for_brick(brick, orientation, position);
+    public boolean placeBrick(Brick brick, Map<Character, Character> orientation, Position position) {
+        Position[] cells = getCellsForBrick(brick, orientation, position);
 
         for (Position cell: cells){
-            if(!cell_free(cell)) return false;
+            if(!cellFree(cell)) return false;
         }
         for (Position cell: cells){
             grid[cell.x()][cell.y()][cell.z()] = brick;
         }
 
-        placed_bricks.push(brick);
+        placedBricks.push(brick);
         return true;
     }
-    private Position[] get_cells_for_brick(Brick brick, Map<Character, Character> orientation, Position position){
-        int orientation_x = Puzzle.get_orientation(orientation.get('x'), brick);
-        int orientation_y = Puzzle.get_orientation(orientation.get('y'), brick);
-        int orientation_z = Puzzle.get_orientation(orientation.get('z'), brick);
+    private Position[] getCellsForBrick(Brick brick, Map<Character, Character> orientation, Position position){
+        int orientationX = Puzzle.getOrientation(orientation.get('x'), brick);
+        int orientationY = Puzzle.getOrientation(orientation.get('y'), brick);
+        int orientationZ = Puzzle.getOrientation(orientation.get('z'), brick);
 
         Position[] cells = new Position[brick.x()*brick.y()*brick.z()];
         int dx, dy, dz, idx;
-        for(int x=position.x(); x<position.x()+orientation_x; x++){
-            for(int y=position.y(); y<position.y()+orientation_y; y++){
-                for(int z=position.z(); z<position.z()+orientation_z; z++){
+        for(int x=position.x(); x<position.x()+orientationX; x++){
+            for(int y=position.y(); y<position.y()+orientationY; y++){
+                for(int z=position.z(); z<position.z()+orientationZ; z++){
                     dx = x-position.x();
                     dy = y-position.y();
                     dz = z-position.z();
-                    idx = dz * orientation_y * orientation_x + dy * orientation_x + dx;
+                    idx = dz * orientationY * orientationX + dy * orientationX + dx;
                     cells[idx] = new Position(x,y,z);
                 }
             }
@@ -70,9 +70,9 @@ public class Box {
         return cells;
     }
 
-    public Position next_cell(Position position) {
+    public Position nextCell(Position position) {
         int x = position.x(), y = position.y(), z = position.z();
-        if (position_outside_box(position)) {
+        if (positionOutsideBox(position)) {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
         }
         x++;
@@ -85,9 +85,9 @@ public class Box {
         }
         return new Position(x,y,z);
     }
-    public Optional<Position> next_free_cell(Position position){
+    public Optional<Position> nextFreeCell(Position position){
         int x = position.x(), y = position.y(), z = position.z();
-        if (position_outside_box(position)) {
+        if (positionOutsideBox(position)) {
             throw new IllegalArgumentException(String.format("Position (%d, %d, %d) is outside box of size %d", x,y,z,size));
         }
         do{
@@ -99,14 +99,14 @@ public class Box {
             if (y == size) {
                 y = 0; z++;
             }
-        } while(z < size && !is_empty(x, y, z));
+        } while(z < size && !isEmpty(x, y, z));
         if(z >= size){
             return Optional.empty();
         }
         return Optional.of(new Position(x,y,z));
     }
     //    prev_position is currently not used
-    public Position prev_cell(Position position) {
+    public Position prevCell(Position position) {
         int x = position.x(), y = position.y(), z = position.z();
         x--;
         if(x < 0){x=size-1; y--;}
@@ -114,7 +114,7 @@ public class Box {
         if(z < 0){z=size-1;}
         return new Position(x,y,z);
     }
-    public boolean position_outside_box(Position position) {
+    public boolean positionOutsideBox(Position position) {
         if (position.x() < 0 || position.y() < 0 || position.z() < 0) {
             return true;
         }
@@ -125,38 +125,38 @@ public class Box {
 
 
 
-    private boolean cell_free(Position position) {
-        if(position_outside_box(position)) return false;
-        return is_empty(position);
+    private boolean cellFree(Position position) {
+        if(positionOutsideBox(position)) return false;
+        return isEmpty(position);
     }
 
-    public boolean is_empty(Position position) {
+    public boolean isEmpty(Position position) {
         int x = position.x();
         int y = position.y();
         int z = position.z();
-        if(position.equals(gold_brick_position)) return false;
+        if(position.equals(goldBrickPosition)) return false;
         return grid[x][y][z] == null;
     }
-    public boolean is_empty(int x, int y, int z){
+    public boolean isEmpty(int x, int y, int z){
         int g = size/2;
         if(x == g && y == g && z == g) return false;
         return grid[x][y][z] == null;
     }
 
-    public String print_box() {
+    public String printBox() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Box Size: ").append(size).append("x").append(size).append("x").append(size).append("\n");
         sb.append("Gold Brick Position: (")
-                .append(gold_brick_position.x()).append(", ")
-                .append(gold_brick_position.y()).append(", ")
-                .append(gold_brick_position.z()).append(")\n\n");
+                .append(goldBrickPosition.x()).append(", ")
+                .append(goldBrickPosition.y()).append(", ")
+                .append(goldBrickPosition.z()).append(")\n\n");
 
         for (int z = 0; z < size; z++) {
             sb.append("Layer Z = ").append(z).append("\n");
             for (int y = 0; y < size; y++) {
                 for (int x = 0; x < size; x++) {
-                    if (x == gold_brick_position.x() && y == gold_brick_position.y() && z == gold_brick_position.z()) {
+                    if (x == goldBrickPosition.x() && y == goldBrickPosition.y() && z == goldBrickPosition.z()) {
                         sb.append(" G ");
                     }
                     else if (grid[x][y][z] != null) {
@@ -174,19 +174,19 @@ public class Box {
         return sb.toString();
     }
 
-    public Stack<Brick> get_placed_bricks() {
-        return placed_bricks;
+    public Stack<Brick> getPlacedBricks() {
+        return placedBricks;
     }
-    public void set_placed_bricks(Stack<Brick> bricks) {
-        placed_bricks = bricks;
+    public void setPlacedBricks(Stack<Brick> bricks) {
+        placedBricks = bricks;
     }
-    public Brick[][][] get_grid() {
+    public Brick[][][] getGrid() {
         return grid;
     }
-    public void set_grid(Brick[][][] grid) {
+    public void setGrid(Brick[][][] grid) {
         this.grid = grid;
     }
-    public int get_size() {
+    public int getSize() {
         return size;
     }
 }

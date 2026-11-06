@@ -16,8 +16,8 @@ public class VoxelModel {
     private final ObjectProperty<Integer> selectedBricks = new SimpleObjectProperty<>();
 
     public VoxelModel(Box box) {
-        gridSize = box.get_size();
-        Brick[][][] grid = box.get_grid();
+        gridSize = box.getSize();
+        Brick[][][] grid = box.getGrid();
         for (int z = 0; z < gridSize; z++)
             for (int y = 0; y < gridSize; y++)
                 for (int x = 0; x < gridSize; x++) {

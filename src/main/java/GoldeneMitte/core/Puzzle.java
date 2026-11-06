@@ -12,53 +12,53 @@ public final class Puzzle {
             Map.of('x', 'z', 'y', 'x', 'z', 'y'),
             Map.of('x', 'y', 'y', 'z', 'z', 'x')
     );
-    public static boolean solve_puzzle(Box box, ArrayList<Brick> bricks) {
-        if (unsolvable_from_start(box, bricks)) {
+    public static boolean solvePuzzle(Box box, ArrayList<Brick> bricks) {
+        if (unsolvableFromStart(box, bricks)) {
             return false;
         }
-        Map<Brick, Set<Integer>> distinct_bricks = distinct_bricks(bricks);
-        return solve_puzzle(box, distinct_bricks, Optional.of(new Position(0,0,0)));
+        Map<Brick, Set<Integer>> distinctBricks = distinctBricks(bricks);
+        return solvePuzzle(box, distinctBricks, Optional.of(new Position(0,0,0)));
     }
-    private static boolean solve_puzzle(Box box, Map<Brick, Set<Integer>> distinct_bricks, Optional<Position> opt_position) {
-        if (distinct_bricks.isEmpty()) {
+    private static boolean solvePuzzle(Box box, Map<Brick, Set<Integer>> distinctBricks, Optional<Position> optPosition) {
+        if (distinctBricks.isEmpty()) {
             return true;
         }
-        if (opt_position.isEmpty()) {
+        if (optPosition.isEmpty()) {
             return false;
         }
-        Position position = opt_position.get();
-        for (Brick brick: new ArrayList<>(distinct_bricks.keySet())) {
-            Set<Integer> ids = distinct_bricks.get(brick);
+        Position position = optPosition.get();
+        for (Brick brick: new ArrayList<>(distinctBricks.keySet())) {
+            Set<Integer> ids = distinctBricks.get(brick);
             int id = ids.iterator().next();
             ids.remove(id);
             if (ids.isEmpty()) {
-                distinct_bricks.remove(brick);
+                distinctBricks.remove(brick);
             }
 
-            if(try_brick(box, distinct_bricks, new Brick(id, brick.x(), brick.y(), brick.z()), position)){
+            if(tryBrick(box, distinctBricks, new Brick(id, brick.x(), brick.y(), brick.z()), position)){
                 return true;
             }
-            distinct_bricks.putIfAbsent(brick, new HashSet<>());
-            distinct_bricks.get(brick).add(id);
+            distinctBricks.putIfAbsent(brick, new HashSet<>());
+            distinctBricks.get(brick).add(id);
         }
         return false;
     }
-    private static boolean try_brick(Box box, Map<Brick, Set<Integer>> distinct_bricks, Brick brick, Position position) {
+    private static boolean tryBrick(Box box, Map<Brick, Set<Integer>> distinctBricks, Brick brick, Position position) {
         for(Map<Character,Character> orientation : brick.orientations()) {
-            if(box.place_brick(brick, orientation, position)){
-                Optional<Position> next = box.next_free_cell(position);
-                if(solve_puzzle(box, distinct_bricks, next)){
+            if(box.placeBrick(brick, orientation, position)){
+                Optional<Position> next = box.nextFreeCell(position);
+                if(solvePuzzle(box, distinctBricks, next)){
                     return true;
                 }
                 else{
-                    box.remove_brick(brick, orientation, position);
+                    box.removeBrick(brick, orientation, position);
                 }
             }
         }
         return false;
     }
 
-    public static Map<Brick, Set<Integer>> distinct_bricks(List<Brick> bricks) {
+    public static Map<Brick, Set<Integer>> distinctBricks(List<Brick> bricks) {
         Set<Integer> ids = new HashSet<>();
         Map<Brick, Set<Integer>> result = new HashMap<>();
         for (Brick brick : bricks) {
@@ -69,14 +69,14 @@ public final class Puzzle {
         }
         return result;
     }
-    private static boolean unsolvable_from_start(Box box, ArrayList<Brick> bricks) {
-        int box_volume = box.get_size() * box.get_size() * box.get_size();
-        int volume_bricks = 0;
+    private static boolean unsolvableFromStart(Box box, ArrayList<Brick> bricks) {
+        int boxVolume = box.getSize() * box.getSize() * box.getSize();
+        int volumeBricks = 0;
         for(Brick brick : bricks){
-            volume_bricks += brick.x()*brick.y()*brick.z();
+            volumeBricks += brick.x()*brick.y()*brick.z();
         }
-        System.out.println(String.format("Boxvolume: %d, Brickvolume: %d", box_volume, volume_bricks));
-        return volume_bricks != box_volume - 1;
+        System.out.println(String.format("Boxvolume: %d, Brickvolume: %d", boxVolume, volumeBricks));
+        return volumeBricks != boxVolume - 1;
     }
     private static ArrayList<Position> neighbors(Box box, Position position, boolean[][][] visited){
         Position [] candidates = new Position[]{
@@ -90,8 +90,8 @@ public final class Puzzle {
         };
         ArrayList<Position> result = new ArrayList<>();
         for(Position candidate : candidates){
-            if(box.position_outside_box(candidate)) continue;
-            if(!box.is_empty(candidate)) continue;
+            if(box.positionOutsideBox(candidate)) continue;
+            if(!box.isEmpty(candidate)) continue;
             if(visited[candidate.x()][candidate.y()][candidate.z()]) continue;
             visited[candidate.x()][candidate.y()][candidate.z()] = true;
             result.add(candidate);
@@ -116,7 +116,7 @@ public final class Puzzle {
 //
 //        }
 //    }
-    public static int get_orientation(Character character, Brick brick) {
+    public static int getOrientation(Character character, Brick brick) {
         int x = brick.x();
         int y = brick.y();
         int z = brick.z();
@@ -127,9 +127,9 @@ public final class Puzzle {
             default -> throw new IllegalArgumentException();
         };
     }
-    public static Box parse_box_string(String box_string) {
+    public static Box parseBoxString(String boxString) {
         String regex = "\\s";
-        String[] parts = box_string.split(regex);
+        String[] parts = boxString.split(regex);
         int[] numbers = new int[parts.length];
         for (int i = 0; i < parts.length; i++) {
             try{
@@ -139,9 +139,9 @@ public final class Puzzle {
         }
         return new Box(numbers[0]);
     }
-    public static Brick parse_brick_string(int id, String brick_string) {
+    public static Brick parseBrickString(int id, String brickString) {
         String regex = "\\s";
-        String[] parts = brick_string.split(regex);
+        String[] parts = brickString.split(regex);
         int[] numbers = new int[parts.length];
         for (int i = 0; i < parts.length; i++) {
             try{
@@ -149,7 +149,7 @@ public final class Puzzle {
             }
             catch(NumberFormatException e){
                 e.printStackTrace();
-                throw new IllegalArgumentException("Invalid brick string: " + brick_string);
+                throw new IllegalArgumentException("Invalid brick string: " + brickString);
             }
         }
         for (int i = 0; i < numbers.length; i++) {
@@ -161,12 +161,12 @@ public final class Puzzle {
         return new Brick(id, x, y, z);
     }
 
-    public static Brick[] parse_multiple_bricks_string(String multiple_bricks_string) {
+    public static Brick[] parseMultipleBricksString(String multipleBricksString) {
         String regex = "\r?\n";
-        String[] brick_strings = multiple_bricks_string.split(regex);
-        Brick[] bricks = new Brick[brick_strings.length];
+        String[] brickStrings = multipleBricksString.split(regex);
+        Brick[] bricks = new Brick[brickStrings.length];
         for (int i = 0; i < bricks.length; i++) {
-            bricks[i] = parse_brick_string(i, brick_strings[i]);
+            bricks[i] = parseBrickString(i, brickStrings[i]);
         }
         return bricks;
     }
