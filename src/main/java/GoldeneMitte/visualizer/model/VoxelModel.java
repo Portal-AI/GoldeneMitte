@@ -13,7 +13,7 @@ public class VoxelModel {
 
     private final int gridSize;
     private final Map<Integer, List<Position>> cellsByBrickId = new LinkedHashMap<>();
-    private final ObjectProperty<Integer> selectedBricks = new SimpleObjectProperty<>();
+    private final ObjectProperty<Integer> selectedBrick = new SimpleObjectProperty<>();
 
     public VoxelModel(Box box) {
         gridSize = box.getSize();
@@ -41,18 +41,18 @@ public class VoxelModel {
     }
 
     public ObjectProperty<Integer> selectedProperty() {
-        return selectedBricks;
+        return selectedBrick;
     }
 
     public Integer getSelected() {
-        return selectedBricks.get();
+        return selectedBrick.get();
     }
 
     public void toggleSelection(int brickId) {
-        selectedBricks.set(Objects.equals(selectedBricks.get(), brickId) ? null : brickId);
+        selectedBrick.set(Objects.equals(selectedBrick.get(), brickId) ? null : brickId);
     }
 
     public void clearSelection() {
-        selectedBricks.set(null);
+        selectedBrick.set(null);
     }
 }
