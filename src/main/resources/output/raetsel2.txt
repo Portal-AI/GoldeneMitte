@@ -1,0 +1,18 @@
+Box Size: 3x3x3
+Gold Brick Position: (1, 1, 1)
+
+Layer Z = 0
+ 0  0  0 
+ 0  0  0 
+ 0  0  0 
+
+Layer Z = 1
+ 4  4  4 
+ 2  G  3 
+ 5  5  5 
+
+Layer Z = 2
+ 1  1  1 
+ 1  1  1 
+ 1  1  1 
+

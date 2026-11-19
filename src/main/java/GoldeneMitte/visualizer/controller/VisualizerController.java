@@ -16,8 +16,7 @@ public class VisualizerController {
     }
 
     private void connectModelToView() {
-        model.selectedProperty().addListener(
-                (observable, oldBrickId, newBrickId) -> view.showSelection(newBrickId));
+        model.addSelectionListener(view::showSelection);
         view.showSelection(model.getSelected());
     }
 

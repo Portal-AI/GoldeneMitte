@@ -34,12 +34,12 @@ public class SceneView extends StackPane {
     private final PhongMaterial dimmedEdgeMaterial = new PhongMaterial(Theme.DIMMED_EDGE);
     private final List<VoxelNode> voxelNodes = new ArrayList<>();
 
-    public SceneView(VoxelModel model) {
+    public SceneView(int gridSize, List<BrickDescriptor> bricks) {
         configureCamera();
 
         world.getTransforms().addAll(rotX, rotY);
-        buildFloorGrid(model.getGridSize());
-        buildVoxels(model);
+        buildFloorGrid(gridSize);
+        buildVoxels(gridSize, bricks);
 
         subScene = createSubScene();
         createResetViewButton();
@@ -106,12 +106,12 @@ public class SceneView extends StackPane {
         }
     }
 
-    private void buildVoxels(VoxelModel model) {
-        double centerOffset = (model.getGridSize() - 1) / 2.0;
+    private void buildVoxels(int gridSize, List<BrickDescriptor> bricks) {
+        double centerOffset = (gridSize - 1) / 2.0;
 
-        for (int brickId : model.getBrickIds()) {
-            for (Position cell : model.getCells(brickId)) {
-                VoxelNode voxel = createVoxel(brickId);
+        for (BrickDescriptor brick : bricks) {
+            for (CellCoordinate cell : brick.cells()) {
+                VoxelNode voxel = createVoxel(brick.id());
                 placeInScene(voxel.group, cell, centerOffset);
                 world.getChildren().add(voxel.group);
                 voxelNodes.add(voxel);
@@ -119,7 +119,7 @@ public class SceneView extends StackPane {
         }
     }
 
-    private static void placeInScene(Group group, Position cell, double centerOffset) {
+    private static void placeInScene(Group group, CellCoordinate cell, double centerOffset) {
         group.setTranslateX(cell.x() - centerOffset);
         group.setTranslateY(-(cell.z() - centerOffset));
         group.setTranslateZ(cell.y() - centerOffset);

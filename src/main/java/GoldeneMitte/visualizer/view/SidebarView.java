@@ -14,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
@@ -21,14 +22,15 @@ public class SidebarView extends VBox {
     private final Map<Integer, HBox> rows = new HashMap<>();
     private IntConsumer onBrickClicked = id -> {};
 
-    public SidebarView(VoxelModel model) {
-        Label header = new Label("Bausteine (" + model.getBrickIds().size() + ")");
+    public SidebarView(List<BrickDescriptor> bricks) {
+        Label header = new Label("Bausteine (" + bricks.size() + ")");
         header.setStyle(Theme.SIDEBAR_HEADER_STYLE);
 
         VBox list = new VBox(4);
         list.setPadding(new Insets(2));
-        for (int id : model.getBrickIds()) {
-            HBox row = createRow(id, BrickStyles.getColor(id), model.getCells(id).size());
+        for (BrickDescriptor brick : bricks) {
+            int id = brick.id();
+            HBox row = createRow(id, BrickStyles.getColor(id), brick.cells().size());
             rows.put(id, row);
             list.getChildren().add(row);
         }

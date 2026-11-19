@@ -1,8 +1,8 @@
 package GoldeneMitte.visualizer.view;
 
-import GoldeneMitte.visualizer.model.VoxelModel;
 import javafx.scene.layout.BorderPane;
 
+import java.util.List;
 import java.util.function.IntConsumer;
 
 public class MainView extends BorderPane {
@@ -10,9 +10,9 @@ public class MainView extends BorderPane {
     private final SidebarView sidebar;
     private final SceneView sceneView;
 
-    public MainView(VoxelModel model) {
-        sidebar = new SidebarView(model);
-        sceneView = new SceneView(model);
+    public MainView(int gridSize, List<BrickDescriptor> bricks) {
+        sidebar = new SidebarView(bricks);
+        sceneView = new SceneView(gridSize, bricks);
 
         setStyle(Theme.MAIN_STYLE);
         setLeft(sidebar);

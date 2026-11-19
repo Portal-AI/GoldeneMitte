@@ -3,17 +3,17 @@ package GoldeneMitte.visualizer.model;
 import GoldeneMitte.core.Box;
 import GoldeneMitte.core.Brick;
 import GoldeneMitte.core.Position;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class VoxelModel {
     public static final int GOLD_BRICK_ID = -1;
 
     private final int gridSize;
     private final Map<Integer, List<Position>> cellsByBrickId = new LinkedHashMap<>();
-    private final ObjectProperty<Integer> selectedBrick = new SimpleObjectProperty<>();
+    private final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
+    private Integer selectedBrickId;
 
     public VoxelModel(Box box) {
         gridSize = box.getSize();
@@ -22,7 +22,7 @@ public class VoxelModel {
             for (int y = 0; y < gridSize; y++)
                 for (int x = 0; x < gridSize; x++) {
                     Brick brick = grid[x][y][z];
-                    if (brick != null) cellsByBrickId.computeIfAbsent(brick.id(), k -> new ArrayList<>()).add(new Position(x, y, z));
+                    if (brick != null) cellsByBrickId.computeIfAbsent(brick.id(), id -> new ArrayList<>()).add(new Position(x, y, z));
                 }
     }
 
@@ -40,19 +40,27 @@ public class VoxelModel {
         return Collections.unmodifiableList(cellsByBrickId.getOrDefault(brickId, List.of()));
     }
 
-    public ObjectProperty<Integer> selectedProperty() {
-        return selectedBrick;
-    }
-
     public Integer getSelected() {
-        return selectedBrick.get();
+        return selectedBrickId;
     }
 
     public void toggleSelection(int brickId) {
-        selectedBrick.set(Objects.equals(selectedBrick.get(), brickId) ? null : brickId);
+        setSelected(Objects.equals(selectedBrickId, brickId) ? null : brickId);
+    }
+
+    public void addSelectionListener(Consumer<Integer> listener) {
+        selectionListeners.add(Objects.requireNonNull(listener));
+    }
+
+    private void setSelected(Integer newSelection) {
+        if (Objects.equals(selectedBrickId, newSelection)) return;
+        selectedBrickId = newSelection;
+        for (Consumer<Integer> listener : List.copyOf(selectionListeners)) {
+            listener.accept(newSelection);
+        }
     }
 
     public void clearSelection() {
-        selectedBrick.set(null);
+        setSelected(null);
     }
 }
