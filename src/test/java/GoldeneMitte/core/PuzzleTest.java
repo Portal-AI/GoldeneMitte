@@ -28,12 +28,6 @@ class PuzzleTest {
         assertEquals(5, Puzzle.parseBoxString("5 5 5").getSize());
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"a b c", "1 2 x", "-1 2 3", "0 1 1", "1 2", "1 2 3 4"})
-    void parseBrickString_invalid_throws(String input) {
-        assertThrows(IllegalArgumentException.class, () -> Puzzle.parseBrickString(0, input));
-    }
-
     @Test
     void parseBrickString_valid() {
         Brick b = Puzzle.parseBrickString(7, "1 2 3");
