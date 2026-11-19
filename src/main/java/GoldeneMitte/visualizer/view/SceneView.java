@@ -22,7 +22,6 @@ public class SceneView extends StackPane {
     private static final double DEFAULT_ZOOM = -14;
     private static final double CUBE_SIZE = 0.9;
 
-    private final BrickStyles styles;
     private final Group world = new Group();
     private final Rotate rotX = new Rotate(DEFAULT_ROTATION_X, Rotate.X_AXIS);
     private final Rotate rotY = new Rotate(DEFAULT_ROTATION_Y, Rotate.Y_AXIS);
@@ -35,8 +34,7 @@ public class SceneView extends StackPane {
     private final PhongMaterial dimmedEdgeMaterial = new PhongMaterial(Theme.DIMMED_EDGE);
     private final List<VoxelNode> voxelNodes = new ArrayList<>();
 
-    public SceneView(VoxelModel model, BrickStyles styles) {
-        this.styles = styles;
+    public SceneView(VoxelModel model) {
         configureCamera();
 
         world.getTransforms().addAll(rotX, rotY);
@@ -162,7 +160,7 @@ public class SceneView extends StackPane {
         for (VoxelNode voxel : voxelNodes) {
             boolean isVisible = selected == null || voxel.brickId == selected;
             voxel.cube.setVisible(isVisible);
-            voxel.cube.setMaterial(styles.getBrickStyle(voxel.brickId).material());
+            voxel.cube.setMaterial(BrickStyles.getBrickStyle(voxel.brickId).material());
             voxel.setOutlineMaterial(isVisible ? outlineMaterial : dimmedEdgeMaterial);
         }
     }

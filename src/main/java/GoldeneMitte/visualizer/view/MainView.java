@@ -11,9 +11,8 @@ public class MainView extends BorderPane {
     private final SceneView sceneView;
 
     public MainView(VoxelModel model) {
-        BrickStyles styles = new BrickStyles();
-        sidebar = new SidebarView(model, styles);
-        sceneView = new SceneView(model, styles);
+        sidebar = new SidebarView(model);
+        sceneView = new SceneView(model);
 
         setStyle(Theme.MAIN_STYLE);
         setLeft(sidebar);

@@ -21,9 +21,7 @@ public class SidebarView extends VBox {
     private final Map<Integer, HBox> rows = new HashMap<>();
     private IntConsumer onBrickClicked = id -> {};
 
-    public SidebarView(VoxelModel model, BrickStyles styles) {
-        super(10);
-
+    public SidebarView(VoxelModel model) {
         Label header = new Label("Bausteine (" + model.getBrickIds().size() + ")");
         header.setStyle(Theme.SIDEBAR_HEADER_STYLE);
 

@@ -14,6 +14,8 @@ public record PuzzleInput(Box box, ArrayList<Brick> bricks) {
         return new PuzzleInput(box, new ArrayList<>(Arrays.asList(bricks)));
     }
 
+
+
     public static PuzzleInput fromFile(String fileName) {
         return fromText(FileManager.readFile(fileName));
     }

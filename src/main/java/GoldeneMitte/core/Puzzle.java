@@ -59,7 +59,6 @@ public final class Puzzle {
     }
 
     public static Map<Brick, Set<Integer>> distinctBricks(List<Brick> bricks) {
-        Set<Integer> ids = new HashSet<>();
         Map<Brick, Set<Integer>> result = new HashMap<>();
         for (Brick brick : bricks) {
             result.merge(brick, new HashSet<>(Set.of(brick.id())), (existing, incoming) -> {

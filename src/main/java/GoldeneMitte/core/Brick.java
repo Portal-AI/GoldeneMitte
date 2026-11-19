@@ -17,8 +17,8 @@ public record Brick(int id, int x, int y, int z, List<Map<Character, Character>>
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Brick other)) return false;
-        return sortedDimensions().equals(other.sortedDimensions());
+        if (!(o instanceof Brick otherBrick)) return false;
+        return this.sortedDimensions().equals(otherBrick.sortedDimensions());
     }
 
     @Override

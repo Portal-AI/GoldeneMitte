@@ -1,0 +1,960 @@
+% =====================================================================
+%  Dokumentation: Projekt "Goldene Mitte"
+%  Übersetzen mit:  pdflatex GoldeneMitte.tex   (zweimal, für das Inhaltsverzeichnis)
+% =====================================================================
+\documentclass[11pt,a4paper,parskip=half]{scrartcl}
+
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[autostyle]{csquotes}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{shapes.multipart, positioning, arrows.meta, calc, fit, backgrounds}
+\usepackage[section,above]{placeins}
+\usepackage{hyperref}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, urlcolor=blue!50!black,
+            pdftitle={Goldene Mitte -- Projektdokumentation}}
+
+% --------------------------------------------------------------------
+%  Allgemeine Makros
+% --------------------------------------------------------------------
+\definecolor{goldcol}{HTML}{D4AF37}
+\newcommand{\gold}{\cellcolor{goldcol}\textbf{G}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framesep=4pt,
+  backgroundcolor=\color{gray!6},
+  rulecolor=\color{gray!40},
+  showstringspaces=false,
+  literate={ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1 {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1
+}
+\lstdefinestyle{java}{language=Java, keywordstyle=\color{blue!60!black}\bfseries,
+  commentstyle=\color{green!40!black}\itshape, stringstyle=\color{red!50!black}}
+
+\algrenewcommand\algorithmicrequire{\textbf{Eingabe:}}
+\algrenewcommand\algorithmicensure{\textbf{Ausgabe:}}
+\floatname{algorithm}{Algorithmus}
+
+% --------------------------------------------------------------------
+%  UML-Klassenboxen (TikZ)
+%   \umlclass[Positionierung]{Knotenname}{Titel}{Attribute}{Methoden}
+% --------------------------------------------------------------------
+\tikzset{
+  umlclass/.style={draw, rectangle split, rectangle split parts=3,
+    rectangle split part fill={blue!8, white, white},
+    text width=#1, font=\ttfamily\scriptsize, align=left, inner sep=3pt},
+  umlclass/.default=6.2cm,
+  dep/.style={-{Stealth[length=2.2mm]}, dashed, thin},
+  assoc/.style={-{Stealth[length=2.2mm]}, thin},
+  comp/.style={{Diamond[length=3mm,width=2mm]}-{Stealth[length=2.2mm]}, thin},
+  aggr/.style={{Diamond[open,length=3mm,width=2mm]}-{Stealth[length=2.2mm]}, thin},
+  lbl/.style={font=\ttfamily\scriptsize, fill=white, inner sep=1pt},
+}
+\newcommand{\umlclass}[5][]{%
+  \node[umlclass, #1] (#2)
+    {\centering\textbf{#3}\par
+     \nodepart{second}#4
+     \nodepart{third}#5};}
+\newcommand{\stereo}[1]{{\normalfont\guillemotleft}#1{\normalfont\guillemotright}}
+\newcommand{\st}[1]{\underline{#1}} % statische Elemente unterstrichen
+
+% =====================================================================
+\title{Goldene Mitte}
+\subtitle{Projektdokumentation -- Lernfeld 13}
+\author{\textit{Name eintragen}}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Einführung}
+% =====================================================================
+
+\subsection{Aufgabenstellung}
+
+Dirk hat zum Geburtstag ein Rätsel bekommen: eine würfelförmige Kiste mit einer
+inneren Kantenlänge von 5\,cm und eine Menge von Würfeln und Quadern. Darunter
+befindet sich ein \emph{goldener Würfel} der Kantenlänge 1\,cm. Die Teile sollen
+so in die Kiste gelegt werden, dass diese \emph{vollständig} gefüllt ist und der
+goldene Würfel \emph{genau in der Mitte} liegt.
+
+Neben dem goldenen Würfel stehen zur Verfügung:
+\begin{itemize}
+  \item vier Würfel mit Kantenlänge 1\,cm,
+  \item sechs Quader $1 \times 2 \times 4$\,cm,
+  \item sechs Quader $2 \times 2 \times 3$\,cm.
+\end{itemize}
+
+Gesucht ist ein Programm, das die Kiste nach diesen Regeln füllt oder meldet, dass es
+keine Lösung gibt. Das Programm soll auch für andere Kisten und andere Mengen von
+Teilen funktionieren. Dabei gilt immer:
+\begin{itemize}
+  \item alle Kantenlängen sind ganzzahlig,
+  \item ein goldener $1\times1\times1$-Würfel ist immer dabei und liegt in der Mitte.
+\end{itemize}
+
+\subsection{Grundlegende Beobachtungen}
+
+\begin{itemize}
+  \item Weil der goldene Würfel \emph{genau} in der Mitte liegen soll, muss die
+        Kantenlänge $n$ der Kiste \textbf{ungerade} sein. Nur dann gibt es eine
+        einzelne Mittelzelle $\left(\lfloor n/2\rfloor, \lfloor n/2\rfloor,
+        \lfloor n/2\rfloor\right)$.
+  \item Da die Kantenlängen ganzzahlig sind, kann man die Kiste als
+        dreidimensionales Gitter aus $n^3$ Einheitszellen auffassen. Jedes Teil
+        belegt einen achsenparallelen Block dieser Zellen.
+  \item Eine Lösung kann es nur geben, wenn das Gesamtvolumen der Teile genau
+        $n^3 - 1$ beträgt, also allen Zellen außer der Mittelzelle entspricht.
+  \item Jedes Teil darf gedreht werden. Ein Quader $a\times b\times c$ hat höchstens
+        $3! = 6$ verschiedene achsenparallele Lagen.
+\end{itemize}
+
+\subsection{Projektüberblick}
+
+Das Projekt ist in Java~25 mit Maven umgesetzt. Es besteht aus zwei Teilen:
+\begin{description}
+  \item[\code{GoldeneMitte.core}] Einlesen der Rätseldateien, Datenmodell
+        (Kiste, Baustein, Position) und der Lösungsalgorithmus
+        (Backtracking).
+  \item[\code{GoldeneMitte.visualizer}] Eine JavaFX-Oberfläche nach dem
+        Model-View-Controller-Muster, die die gefundene Lösung dreidimensional
+        darstellt. Die Ansicht lässt sich drehen und zoomen, und einzelne Bausteine
+        können ausgewählt werden.
+\end{description}
+
+% =====================================================================
+\section{Benutzeranleitung}
+% =====================================================================
+
+\subsection{Voraussetzungen}
+
+\begin{itemize}
+  \item JDK~25 (die \file{pom.xml} kompiliert mit \code{maven.compiler.release = 25}),
+  \item Apache Maven~3.9 oder neuer, alternativ IntelliJ IDEA mit Maven-Unterstützung,
+  \item JavaFX~21 und JUnit~5. Beide werden automatisch von Maven geladen.
+\end{itemize}
+
+\textbf{Hinweis:} Maven muss mit einem JDK~25 laufen. Ist ein älteres JDK
+eingestellt, bricht der Build ab. Dann muss \code{JAVA\_HOME} vorher auf das JDK~25
+gesetzt werden.
+
+\subsection{Format der Eingabedateien}
+
+Die Rätsel liegen als Textdateien im Ordner \file{src/main/resources/input/}. Jede
+Datei enthält
+\begin{enumerate}
+  \item in der ersten Zeile die inneren Kantenlängen der Kiste: \code{x y z},
+  \item in der zweiten Zeile die Anzahl $k$ der Teile,
+  \item in den folgenden $k$ Zeilen jeweils die Kantenlängen \code{a b c} eines Teils.
+\end{enumerate}
+Der goldene Würfel wird \emph{nicht} aufgeführt, er ist immer dabei. Die Datei für
+Dirks Rätsel (\file{raetsel5.txt}) beginnt zum Beispiel so:
+
+\begin{lstlisting}
+5 5 5
+16
+1 1 1
+2 2 3
+2 2 3
+...
+\end{lstlisting}
+
+Mitgeliefert werden die Beispiele \file{raetsel1.txt} bis \file{raetsel5.txt} sowie
+zwei absichtlich fehlerhafte Rätsel, \file{raetsel\_nicht\_lösbar.txt} und
+\file{raetsel\_unvollständig.txt} (siehe Abschnitt~\ref{sec:ergebnisse}).
+
+\subsection{Programm starten}
+
+Es gibt zwei Einstiegspunkte:
+
+\begin{description}
+  \item[Konsolenversion -- \code{GoldeneMitte.Main}]
+    Liest ein Rätsel ein, löst es und gibt das Ergebnis (\code{true}/\code{false})
+    sowie die Kiste Ebene für Ebene auf der Konsole aus. Start aus dem
+    Projektverzeichnis:
+\begin{lstlisting}
+mvn compile
+java -cp target/classes GoldeneMitte.Main
+\end{lstlisting}
+
+  \item[Grafische Version -- \code{GoldeneMitte.Launcher}]
+    Startet die JavaFX-Anwendung \code{Visualizer}. Diese löst das Rätsel, schreibt
+    die Lösung zusätzlich in die Datei \file{src/main/resources/\allowbreak output/\allowbreak raetsel4.txt}
+    und zeigt sie in 3D an. In IntelliJ wird dazu die Klasse \code{Launcher} über den
+    grünen Pfeil gestartet. Die eigene Klasse \code{Launcher} ist nötig, weil der
+    JavaFX-Start aus einer Klasse, die selbst von \code{Application} erbt, ohne
+    Modulpfad fehlschlägt.
+\end{description}
+
+Beide Programme müssen mit dem \emph{Projektverzeichnis} als Arbeitsverzeichnis
+gestartet werden, weil die Dateipfade relativ angegeben sind.
+
+\paragraph{Anderes Rätsel auswählen.}
+Der Pfad der Eingabedatei steht zurzeit fest im Quelltext, jeweils in der ersten Zeile
+von \code{Main.main} bzw. \code{Visualizer.start}:
+\begin{lstlisting}[style=java]
+PuzzleInput input = PuzzleInput.fromFile("src/main/resources/input/raetsel4.txt");
+\end{lstlisting}
+Für ein anderes Rätsel wird der Dateiname hier geändert.
+
+\subsection{Ausgabe lesen}
+
+Die Konsolenausgabe zeigt die Kiste in Schichten (\emph{Layer}) entlang der
+$z$-Achse. In jeder Schicht steht eine Zeile für einen $y$-Wert und eine Spalte für
+einen $x$-Wert. Jede Zahl ist die ID des Teils, das diese Zelle belegt. \code{G}
+markiert den goldenen Würfel, ein Punkt eine leere Zelle.
+
+\textbf{Wichtig:} Die IDs beginnen bei \textbf{0}. ID~$i$ steht für das Teil in
+Zeile $i+3$ der Eingabedatei, also das $(i+1)$-te aufgeführte Teil.
+
+\subsection{Bedienung der 3D-Ansicht}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Aktion} & \textbf{Wirkung} \\
+\midrule
+Linke Maustaste ziehen & Kiste drehen \\
+Mausrad & Zoomen \\
+Klick auf einen Baustein (3D oder Seitenleiste) & Nur diesen Baustein farbig anzeigen. Die übrigen erscheinen als graue Umrisse. \\
+Erneuter Klick auf denselben Baustein & Auswahl aufheben \\
+Klick ins Leere & Auswahl aufheben \\
+Schaltfläche \enquote{Ansicht zurücksetzen} & Kamera in die Ausgangslage bringen \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Die Seitenleiste listet alle Bausteine mit Farbe, ID und Anzahl der belegten Zellen
+(\enquote{Voxel}) auf. Wurde keine Lösung gefunden, trägt das Fenster den Titel
+\enquote{Demo (nicht gelöst)}.
+
+% =====================================================================
+\section{Algorithmus}
+% =====================================================================
+
+Das Programm löst das Rätsel mit \textbf{Backtracking}, also einer systematischen
+Tiefensuche über alle Möglichkeiten, die Teile zu legen. Mehrere Maßnahmen verkleinern
+den Suchraum so stark, dass auch die $5\times5\times5$-Rätsel in wenigen Sekunden
+gelöst werden.
+
+\subsection{Datenmodell}
+
+\begin{itemize}
+  \item Die Kiste (\code{Box}) ist ein Feld \code{Brick[n][n][n]}. Eine Zelle ist
+        \code{null}, wenn sie frei ist, und enthält sonst eine Referenz auf den
+        Baustein, der sie belegt. Der Konstruktor legt sofort den goldenen Würfel in
+        die Mittelzelle und lehnt gerade oder nicht positive Kantenlängen mit einer
+        \code{IllegalArgumentException} ab.
+  \item Ein Baustein (\code{Brick}) speichert seine ID, die Kantenlängen
+        $x, y, z$ und die Liste seiner \emph{verschiedenen} Orientierungen.
+\end{itemize}
+
+\subsection{Schritt 1: Volumenprüfung}
+
+Vor der eigentlichen Suche wird geprüft, ob
+\[
+  \sum_{i} a_i \cdot b_i \cdot c_i \;=\; n^3 - 1 .
+\]
+Ist das nicht der Fall, ist das Rätsel sicher unlösbar und das Programm gibt sofort
+\code{false} zurück (Methode \code{unsolvableFromStart}). So werden zum Beispiel die
+Dateien \file{raetsel\_nicht\_lösbar.txt} (Volumen~28 statt~26) und
+\file{raetsel\_unvollständig.txt} (Volumen~22 statt~26) ohne Suche abgelehnt.
+
+\subsection{Schritt 2: Orientierungen ohne Duplikate}
+
+Ein Quader kann auf $3! = 6$ Arten achsenparallel gedreht werden: Jede Permutation
+der Kantenlängen auf die Achsen $x, y, z$ ergibt eine Lage. Diese sechs Permutationen
+stehen in \code{Puzzle.orientations}. Bei Teilen mit gleichen Kantenlängen ergeben
+einige Permutationen dieselbe Lage. Ein Würfel hat zum Beispiel nur eine einzige.
+Beim Erzeugen eines \code{Brick} werden die resultierenden Maße deshalb als
+\code{Triple} in einem \code{HashSet} gesammelt, und es bleiben nur die
+verschiedenen Lagen übrig:
+
+\begin{center}
+\begin{tabular}{@{}lc@{\hspace{2.5em}}lc@{}}
+\toprule
+\textbf{Teil} & \textbf{Lagen} & \textbf{Teil} & \textbf{Lagen} \\
+\midrule
+$1\times1\times1$, $2\times2\times2$ & 1 & $1\times2\times3$, $1\times2\times4$ & 6 \\
+$1\times1\times2$, $1\times1\times5$, $1\times2\times2$ & 3 & $2\times2\times3$, $1\times3\times3$ & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Schritt 3: Gleiche Teile zusammenfassen}
+
+Viele Rätsel enthalten mehrere gleiche Teile, Dirks Rätsel etwa sechsmal
+$2\times2\times3$. Würde man jedes Teil einzeln betrachten, probierte die Suche jede
+Vertauschung gleicher Teile erneut aus, obwohl das zur selben Belegung führt.
+
+Deshalb gelten zwei \code{Brick}-Objekte als \emph{gleich}, wenn ihre
+\emph{sortierten} Kantenlängen übereinstimmen (\code{equals}/\code{hashCode}
+vergleichen \code{sortedDimensions()}). Ein $1\times2\times4$- und ein
+$4\times1\times2$-Teil sind also gleich. Die Methode \code{distinctBricks} gruppiert
+die Teile in eine \code{Map<Brick, Set<Integer>>} von \emph{Teiltyp} auf die IDs der
+noch verfügbaren Exemplare. Die Suche wählt dann nur noch einen \emph{Typ} aus und
+nimmt irgendein freies Exemplar davon.
+
+Bei \file{raetsel4.txt} schrumpft das von 20 einzelnen Teilen auf 5 Typen. Die
+Anzahl der eingesparten gleichwertigen Vertauschungen beträgt
+$4!\cdot 9!\cdot 5! \approx 10^9$.
+
+\subsection{Schritt 4: Füllen der ersten freien Zelle}
+
+Die Zellen werden in einer festen Reihenfolge durchlaufen: zuerst $x$, dann $y$, dann
+$z$ (Methode \code{nextFreeCell}). Die Suche betrachtet immer die \emph{erste freie
+Zelle} $c$ in dieser Reihenfolge und legt ein Teil so, dass seine \emph{kleinste
+Ecke} genau in $c$ liegt.
+
+\paragraph{Warum reicht das?}
+Irgendein Teil muss $c$ in einer Lösung belegen. Seine kleinste Ecke $m$ liegt in
+jeder Koordinate höchstens bei $c$, kommt in der Durchlaufreihenfolge also nicht nach
+$c$. Wäre $m \neq c$, so läge $m$ \emph{vor} $c$. Dann wäre $m$ jetzt noch frei, weil
+das Teil noch nicht gelegt ist. Das widerspricht der Wahl von $c$ als
+\emph{erster} freier Zelle. Also ist $m = c$, und es genügt, jedes Teil nur an dieser
+einen Stelle auszuprobieren. Das reduziert die Suche stark, weil nicht jede Position
+der Kiste geprüft werden muss.
+
+\subsection{Schritt 5: Backtracking}
+
+\begin{algorithm}[H]
+\caption{\code{solvePuzzle} (vereinfacht)}
+\begin{algorithmic}[1]
+\Require Kiste \textit{box}, Abbildung \textit{typen}: Teiltyp $\to$ freie IDs, Zelle $c$ (optional)
+\Ensure \code{true}, wenn die Kiste vollständig gefüllt werden kann
+\Function{Solve}{\textit{box}, \textit{typen}, $c$}
+  \If{\textit{typen} ist leer} \Return \code{true} \Comment{alle Teile gelegt}
+  \EndIf
+  \If{$c$ existiert nicht} \Return \code{false} \Comment{kein Platz mehr, aber Teile übrig}
+  \EndIf
+  \For{\textbf{each} Teiltyp $T$ in \textit{typen}}
+    \State nimm eine freie ID $i$ von $T$ aus \textit{typen} heraus
+    \For{\textbf{each} Orientierung $o$ von $T$}
+      \If{\Call{placeBrick}{\textit{box}, $T_i$, $o$, $c$}} \Comment{passt in die Kiste und überlappt nicht}
+        \State $c' \gets$ \Call{nextFreeCell}{$c$}
+        \If{\Call{Solve}{\textit{box}, \textit{typen}, $c'$}}
+          \State \Return \code{true}
+        \EndIf
+        \State \Call{removeBrick}{\textit{box}, $T_i$, $o$, $c$} \Comment{Backtracking: Zug zurücknehmen}
+      \EndIf
+    \EndFor
+    \State lege ID $i$ wieder in \textit{typen} zurück
+  \EndFor
+  \State \Return \code{false}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\code{placeBrick} berechnet zuerst alle Zellen, die das Teil in der gewählten
+Orientierung ab Position $c$ belegen würde (\code{getCellsForBrick}). Liegt eine
+dieser Zellen außerhalb der Kiste oder ist sie schon belegt (auch durch den goldenen
+Würfel), wird nichts verändert und \code{false} zurückgegeben. Andernfalls werden alle
+Zellen belegt.
+
+Wird \code{true} zurückgegeben, enthält \code{box} die vollständige Lösung. Wird
+\code{false} zurückgegeben, wurden alle Möglichkeiten erschöpfend geprüft, und das
+Rätsel ist nachweislich unlösbar.
+
+\subsection{Komplexität}
+
+Im schlechtesten Fall wächst die Laufzeit exponentiell mit der Zahl der Teile, denn
+das Problem ist ein Packproblem. Die Volumenprüfung, die Zusammenfassung gleicher
+Teile, das Entfernen doppelter Orientierungen und das Füllen der ersten freien Zelle
+schneiden aber große Teile des Suchbaums ab. In der Praxis sind die Laufzeiten
+deshalb gering (siehe Tabelle~\ref{tab:ergebnisse}).
+
+% =====================================================================
+\section{Klassendiagramm (OOD)}
+% =====================================================================
+
+Die Klassen sind auf zwei Pakete verteilt: \code{core} enthält die Fachlogik ohne
+Abhängigkeit zu JavaFX, \code{visualizer} enthält die Oberfläche. So lässt sich der
+Kern unabhängig von der Oberfläche testen und wiederverwenden.
+
+Notation: \code{+}~öffentlich, \code{-}~privat, \code{\textasciitilde}~paketsichtbar,
+\st{unterstrichen}~statisch. Durchgezogene Pfeile sind Assoziationen (Attribute),
+gestrichelte Pfeile Abhängigkeiten (\enquote{benutzt}/\enquote{erzeugt}), Rauten
+Kompositionen bzw. Aggregationen.
+
+\subsection{Paket \code{core}}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=1.1cm and 1.8cm]
+  % ---------- Zeile 1 ----------
+  \umlclass[anchor=north, umlclass=9.4cm]{PuzzleInput}{\stereo{record} PuzzleInput}
+    {+ box : Box\\+ bricks : ArrayList<Brick>}
+    {+ \st{fromText(text : String) : PuzzleInput}\\
+     + \st{fromFile(fileName : String) : PuzzleInput}}
+  \umlclass[right=of PuzzleInput.north east, anchor=north west, umlclass=9.4cm]{FileManager}{\stereo{final} FileManager}
+    {~}
+    {+ \st{readFile(fileName : String) : String}\\
+     + \st{writeFile(fileName : String, content : String)}}
+
+  % ---------- Zeile 2 ----------
+  \umlclass[below=of PuzzleInput, umlclass=9.4cm]{Puzzle}{\stereo{final} Puzzle}
+    {+ \st{orientations : List<Map<Character,Character>{}>}}
+    {+ \st{solvePuzzle(box : Box, bricks : ArrayList<Brick>) : boolean}\\
+     - \st{solvePuzzle(box, distinct, pos : Optional<Position>) : boolean}\\
+     - \st{tryBrick(box, distinct, brick, pos : Position) : boolean}\\
+     + \st{distinctBricks(bricks : List<Brick>) : Map<Brick,Set<Integer>{}>}\\
+     - \st{unsolvableFromStart(box, bricks) : boolean}\\
+     + \st{getOrientation(c : Character, brick : Brick) : int}\\
+     + \st{parseBoxString(s : String) : Box}\\
+     + \st{parseBrickString(id : int, s : String) : Brick}\\
+     + \st{parseMultipleBricksString(s : String) : Brick[]}}
+  \umlclass[below=of FileManager, umlclass=9.4cm]{Box}{Box}
+    {- placedBricks : Stack<Brick>\\
+     - grid : Brick[][][]\\
+     - size : int\\
+     - goldBrickPosition : Position\\
+     - goldBrick : Brick}
+    {+ Box(size : int)\\
+     + placeBrick(b : Brick, o : Map<..>, p : Position) : boolean\\
+     + removeBrick(b : Brick, o : Map<..>, p : Position)\\
+     + removeBrick(b : Brick)\\
+     - getCellsForBrick(b, o, p) : Position[]\\
+     + nextCell(p : Position) : Position\\
+     + nextFreeCell(p : Position) : Optional<Position>\\
+     + positionOutsideBox(p : Position) : boolean\\
+     + isEmpty(p : Position) : boolean\\
+     - cellFree(p : Position) : boolean\\
+     + printBox() : String\\
+     + getGrid() : Brick[][][]\\
+     + getSize() : int}
+
+  % ---------- Zeile 3 (unterhalb der höheren Klasse Box) ----------
+  \coordinate (row3) at ($(Box.south)+(0,-1.4)$);
+  \umlclass[anchor=north west, umlclass=9.4cm, at={(Puzzle.west |- row3)}]{Brick}{\stereo{record} Brick}
+    {+ id : int\\+ x : int\\+ y : int\\+ z : int\\
+     + orientations : List<Map<Character,Character>{}>}
+    {\textasciitilde\ Brick(id, x, y, z : int)\\
+     + equals(o : Object) : boolean\\
+     + hashCode() : int\\
+     - sortedDimensions() : List<Integer>\\
+     - \st{getOrientations(x, y, z : int) : List<Map<...>{}>}}
+  \umlclass[anchor=north west, umlclass=3.6cm, at={(Box.west |- row3)}]{Position}{\stereo{record} Position}
+    {+ x : int\\+ y : int\\+ z : int}{~}
+  \umlclass[right=1.2cm of Position.north east, anchor=north west, umlclass=3.6cm]{Triple}{\stereo{record} Triple}
+    {+ x : int\\+ y : int\\+ z : int}{~}
+
+  % ---------- Beziehungen ----------
+  \draw[dep] (PuzzleInput.east) -- node[lbl, above]{\stereo{use}} (PuzzleInput.east -| FileManager.west);
+  \draw[dep] (PuzzleInput) -- node[lbl, right]{\stereo{use}} (Puzzle);
+  \draw[assoc] (PuzzleInput.south east) -- node[lbl, pos=0.5]{box 1} (Box.north west);
+  \draw[assoc] (PuzzleInput.west) -- ++(-0.7,0) |- node[lbl, pos=0.25]{bricks 0..*} (Brick.west);
+  \draw[dep] (Puzzle.east) -- node[lbl, above]{\stereo{use}} (Puzzle.east -| Box.west);
+  \draw[dep] (Puzzle.south) -- node[lbl, right]{\stereo{create}} (Puzzle.south |- Brick.north);
+  \draw[aggr] (Box.south west) ++(0.6,0) coordinate (bs)
+              (bs) -- node[lbl, pos=0.45]{grid 0..*} (Brick.north east);
+  \draw[assoc] (Position.north |- Box.south) -- node[lbl, right]{goldBrickPosition 1} (Position.north);
+  \draw[dep] (Brick.south) -- ++(0,-0.5) -| node[lbl, pos=0.25, below]{\stereo{use}} (Triple.south);
+\end{tikzpicture}}
+\caption{Klassendiagramm des Pakets \code{GoldeneMitte.core}}
+\label{fig:core}
+\end{figure}
+
+\begin{description}
+  \item[\code{Puzzle}] Statische Hilfsklasse mit der Fachlogik: Einlesen der
+    Textbausteine (\code{parse...}), Volumenprüfung, Gruppierung gleicher Teile und
+    der rekursive Backtracking-Algorithmus (\code{solvePuzzle}, \code{tryBrick}).
+    Sie enthält außerdem die sechs möglichen Achsen-Permutationen
+    (\code{orientations}).
+  \item[\code{Box}] Die Kiste als dreidimensionales Gitter. Sie kapselt alle
+    Zugriffe auf das Gitter: Teile legen und entfernen, freie Zellen finden, Grenzen
+    prüfen und die Kiste als Text ausgeben. Der goldene Würfel wird im Konstruktor
+    fest in die Mitte gelegt.
+  \item[\code{Brick}] Unveränderlicher Baustein (Java-\code{record}) mit ID, Maßen
+    und vorberechneten, eindeutigen Orientierungen. \code{equals}/\code{hashCode}
+    vergleichen bewusst nur die sortierten Maße und nicht die ID, damit gleiche Teile
+    in der \code{Map} von \code{distinctBricks} zusammenfallen.
+  \item[\code{Position}, \code{Triple}] Einfache Werttypen für eine Gitterzelle bzw.
+    für die Maße einer Orientierung (zum Entfernen von Duplikaten).
+  \item[\code{PuzzleInput}] Bündelt das Ergebnis des Einlesens (Kiste und Teile)
+    und bietet mit \code{fromFile}/\code{fromText} \emph{eine} zentrale Stelle zum
+    Parsen. Diese wird von \code{Main}, \code{Visualizer} und den Tests gemeinsam
+    genutzt.
+  \item[\code{FileManager}] Lesen und Schreiben von Textdateien. Ein-/Ausgabefehler
+    werden in eine \code{RuntimeException} mit dem absoluten Dateipfad umgewandelt.
+\end{description}
+
+\subsection{Paket \code{visualizer} und Einstiegspunkte}
+
+Die Oberfläche folgt dem \textbf{Model-View-Controller}-Muster:
+\begin{itemize}
+  \item Das \emph{Model} (\code{VoxelModel}) kennt die belegten Zellen je Baustein
+        und den aktuell ausgewählten Baustein.
+  \item Die \emph{Views} (\code{MainView}, \code{SidebarView}, \code{SceneView})
+        stellen dar und melden Benutzereingaben weiter, ändern das Model aber nicht
+        selbst.
+  \item Die \emph{Controller} (\code{VisualizerController}, \code{CameraController})
+        verbinden beide Seiten.
+\end{itemize}
+
+\begin{figure}[tbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=1.0cm and 1.2cm]
+  % ---------- Spalte 1: Einstieg + Model ----------
+  \umlclass[anchor=north, umlclass=7.3cm]{Launcher}{Launcher}
+    {~}{+ \st{main(args : String[])}}
+  \umlclass[below=of Launcher, umlclass=7.3cm]{VoxelModel}{VoxelModel}
+    {+ \st{GOLD\_BRICK\_ID : int = -1}\\
+     - gridSize : int\\
+     - cellsByBrickId : Map<Integer,List<Position>{}>\\
+     - selectedBrick : ObjectProperty<Integer>}
+    {+ VoxelModel(box : Box)\\
+     + getGridSize() : int\\
+     + getBrickIds() : List<Integer>\\
+     + getCells(id : int) : List<Position>\\
+     + selectedProperty() : ObjectProperty<Integer>\\
+     + getSelected() : Integer\\
+     + toggleSelection(id : int)\\
+     + clearSelection()}
+  \umlclass[below=of VoxelModel, umlclass=7.3cm]{Theme}{\stereo{final} Theme}
+    {\textasciitilde\ \st{GOLD\_COLOR, OUTLINE\_EDGE, ...: Color}\\
+     \textasciitilde\ \st{MAIN\_STYLE, ROW\_STYLE, ...: String}}{~}
+
+  % ---------- Spalte 2: Controller ----------
+  \umlclass[right=of Launcher.north east, anchor=north west, umlclass=7.3cm]{Visualizer}{Visualizer {\normalfont\itshape extends Application}}
+    {~}{+ start(stage : Stage)}
+  \umlclass[below=of Visualizer, umlclass=7.3cm]{VisualizerController}{VisualizerController}
+    {- model : VoxelModel\\- view : MainView}
+    {+ VisualizerController(model, view)\\
+     - connectModelToView()\\
+     - connectViewToModel()\\
+     - onSceneClicked(brickId : Integer)}
+  \umlclass[below=of VisualizerController, umlclass=7.3cm]{CameraController}{CameraController}
+    {- \st{ROTATE\_SPEED, ZOOM\_SPEED, DRAG\_THRESHOLD}\\
+     - sceneView : SceneView\\
+     - onSceneClicked : Consumer<Integer>\\
+     - lastMouseX/Y, pressStartX/Y : double\\
+     - isDragging : boolean}
+    {\textasciitilde\ CameraController(view, onSceneClicked)\\
+     - setMouseHandlers()}
+  \umlclass[below=of CameraController, umlclass=7.3cm]{BrickStyles}{BrickStyles}
+    {- stylesByBrickId : Map<Integer,BrickStyle>}
+    {+ getBrickStyle(id : int) : BrickStyle\\
+     \textasciitilde\ \st{getColor(id : int) : Color}}
+  \umlclass[below=of BrickStyles, umlclass=7.3cm]{BrickStyle}{\stereo{record} BrickStyle}
+    {+ color : Color\\+ material : PhongMaterial}{~}
+
+  % ---------- Spalte 3: Views ----------
+  \umlclass[right=of Visualizer.north east, anchor=north west, umlclass=7.3cm]{MainView}{MainView {\normalfont\itshape extends BorderPane}}
+    {- sidebar : SidebarView\\- sceneView : SceneView}
+    {+ MainView(model : VoxelModel)\\
+     + getSceneView() : SceneView\\
+     + showSelection(selected : Integer)\\
+     + setOnBrickClicked(h : IntConsumer)\\
+     + setOnResetCameraRequested(h : Runnable)}
+  \umlclass[below=of MainView, umlclass=7.3cm]{SidebarView}{SidebarView {\normalfont\itshape extends VBox}}
+    {- rows : Map<Integer,HBox>\\- onBrickClicked : IntConsumer}
+    {+ showSelection(selected : Integer)\\
+     + setOnBrickClicked(h : IntConsumer)\\
+     - createRow(id, color, cells) : HBox}
+  \umlclass[below=of SidebarView, umlclass=7.3cm]{SceneView}{SceneView {\normalfont\itshape extends StackPane}}
+    {- world : Group\\
+     - rotX, rotY : Rotate\\
+     - camera : PerspectiveCamera\\
+     - subScene : SubScene\\
+     - voxelNodes : List<VoxelNode>}
+    {+ showSelection(selected : Integer)\\
+     + findBrickId(n : Node) : Integer\\
+     + rotate(dy, dx : double)\\
+     + zoom(delta : double)\\
+     + resetCamera()\\
+     + getSubScene() : SubScene\\
+     + setReset(h : Runnable)\\
+     - buildFloorGrid(size : int)\\
+     - buildVoxels(model : VoxelModel)}
+  \umlclass[below=of SceneView, umlclass=7.3cm]{VoxelNode}{VoxelNode}
+    {+ brickId : int\\+ cube : Box\\+ outlineBars : List<Box>\\+ group : Group}
+    {\textasciitilde\ setOutlineMaterial(m : PhongMaterial)}
+
+  % ---------- Beziehungen ----------
+  \draw[dep] (Launcher.east) -- node[lbl, above]{\stereo{launch}} (Launcher.east -| Visualizer.west);
+  \draw[dep] (Visualizer.south west) -- node[lbl, pos=0.45]{\stereo{create}} (VoxelModel.north east);
+  \draw[dep] (Visualizer) -- node[lbl, right]{\stereo{create}} (VisualizerController);
+  \draw[dep] (Visualizer.east) -- node[lbl, above]{\stereo{create}} (Visualizer.east -| MainView.west);
+  \draw[assoc] (VisualizerController.west) -- node[lbl, above]{model 1} (VisualizerController.west -| VoxelModel.east);
+  \draw[assoc] (VisualizerController.north east) -- node[lbl, pos=0.5]{view 1} (MainView.south west);
+  \draw[dep] (VisualizerController) -- node[lbl, right]{\stereo{create}} (CameraController);
+  \draw[assoc] (CameraController.south east) -- node[lbl, pos=0.4, below left]{sceneView 1} (SceneView.west);
+  \draw[comp] (MainView) -- node[lbl, right]{1} (SidebarView);
+  \draw[comp] (MainView.east) -- ++(0.5,0) |- node[lbl, pos=0.75, above]{1} (SceneView.east);
+  \draw[comp] (SceneView) -- node[lbl, right]{0..*} (VoxelNode);
+  \draw[dep] (SceneView.west |- BrickStyles.east) -- (BrickStyles.east);
+  \draw[dep] (SidebarView.west) -- ++(-0.6,0) |- node[lbl, pos=0.3, left]{\stereo{use}} (BrickStyles.east);
+  \draw[aggr] (BrickStyles) -- node[lbl, right]{0..*} (BrickStyle);
+\end{tikzpicture}}
+\caption{Klassendiagramm des Pakets \code{GoldeneMitte.visualizer} mit den Einstiegspunkten}
+\label{fig:visualizer}
+\end{figure}
+
+\begin{description}
+  \item[\code{Launcher}, \code{Visualizer}] \code{Launcher.main} startet die
+    JavaFX-Anwendung \code{Visualizer}. Diese liest das Rätsel ein, löst es, speichert
+    die Lösung und baut dann Model, View und Controller auf.
+  \item[\code{Main}] (nicht abgebildet) ist die Konsolenvariante ohne Oberfläche.
+    Sie benutzt nur \code{PuzzleInput}, \code{Puzzle} und \code{Box}.
+  \item[\code{VoxelModel}] Übersetzt das \code{Brick[][][]}-Gitter der \code{Box}
+    einmalig in eine Abbildung \emph{Baustein-ID $\to$ Liste belegter Zellen}. Die
+    Auswahl wird als JavaFX-\code{ObjectProperty} gehalten, damit sich Views über
+    Änderungen benachrichtigen lassen können (Beobachter-Muster).
+  \item[\code{VisualizerController}] Registriert einen Listener auf die Auswahl im
+    Model und leitet Änderungen an \code{MainView.showSelection} weiter. Umgekehrt
+    gibt er Klicks aus der View als \code{toggleSelection}/\code{clearSelection} an
+    das Model weiter.
+  \item[\code{CameraController}] Wertet die Mausereignisse der 3D-Szene aus. Ziehen
+    dreht die Kamera, das Mausrad zoomt. Ein einfacher Klick ohne Ziehen (Schwelle
+    \code{DRAG\_THRESHOLD}) wählt den getroffenen Baustein aus.
+  \item[\code{MainView}] Container (\code{BorderPane}) mit der Seitenleiste links und
+    der 3D-Szene in der Mitte. Er bietet dem Controller eine schmale Schnittstelle an.
+  \item[\code{SidebarView}] Liste aller Bausteine mit Farbe, ID und Zellanzahl.
+  \item[\code{SceneView}] Baut die 3D-Szene aus einem \code{VoxelNode} je Zelle auf,
+    zeichnet ein Bodengitter und verwaltet Kamera, Drehung und Zoom.
+  \item[\code{VoxelNode}] Eine Zelle in der Szene: ein Würfel plus zwölf
+    Kantenbalken als Umriss.
+  \item[\code{BrickStyles}, \code{BrickStyle}, \code{Theme}] Farbgebung: Jeder ID
+    wird über einen Farbton-Versatz von $137^\circ$ eine gut unterscheidbare Farbe
+    zugeordnet. Der goldene Würfel ist immer goldfarben. \code{Theme} sammelt alle
+    Farb- und Stilkonstanten an einer Stelle.
+\end{description}
+
+% =====================================================================
+\section{Tests}
+% =====================================================================
+
+\subsection{Vorgehen}
+
+Die Fachlogik im Paket \code{core} wird mit \textbf{JUnit~5} automatisiert getestet.
+Die Tests liegen unter \file{src/test/java/GoldeneMitte/core/} und werden mit
+\begin{lstlisting}
+mvn test
+\end{lstlisting}
+oder direkt in IntelliJ ausgeführt. Beim Schreiben der Tests wurden folgende
+Grundsätze beachtet:
+\begin{itemize}
+  \item \textbf{Arrange -- Act -- Assert:} Jeder Test baut zuerst die Eingabe auf,
+        führt dann genau eine Aktion aus und prüft danach das Ergebnis.
+  \item \textbf{Ein Szenario pro Test} und sprechende Testnamen
+        (z.\,B. \code{placeBrick\_\allowbreak overlappingBrick\_\allowbreak returnsFalse}). So zeigt schon
+        der Name eines fehlgeschlagenen Tests, was kaputt ist.
+  \item \textbf{Parametrisierte Tests} (\code{@ParameterizedTest},
+        \code{@ValueSource}) prüfen viele ungültige Eingaben mit einem einzigen
+        Testfall.
+  \item \textbf{Grenzfälle:} Kistengröße 1, gerade und negative Größen, Zellen am
+        Rand, Teile, die aus der Kiste ragen, Volumen um genau eins zu groß bzw. zu
+        klein.
+  \item \textbf{Isolation:} Dateitests schreiben mit \code{@TempDir} in ein
+        temporäres Verzeichnis, damit die echten Projektdateien unberührt bleiben.
+        Jeder Test bekommt über \code{@BeforeEach} eine frische Kiste.
+  \item \textbf{Den echten Code testen:} Die Tests der Beispieldateien laden die
+        Dateien über dieselbe Methode \code{PuzzleInput.fromFile}, die auch die
+        Anwendung benutzt, statt die Parse-Logik nachzubauen.
+\end{itemize}
+
+\subsection{Übersicht der Testklassen}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lcX@{}}
+\toprule
+\textbf{Testklasse} & \textbf{Tests} & \textbf{Geprüft wird} \\
+\midrule
+\code{BoxTest} & 20 &
+  Konstruktor (gültige/ungültige Größen), goldener Würfel in der Mitte,
+  Bereichsprüfung, \code{nextCell}/\code{nextFreeCell} inkl. Zeilen-/Ebenenumbruch
+  und Überspringen der Mitte, Legen (passt, überlappt, ragt heraus, auf den
+  goldenen Würfel) und Entfernen von Teilen, Textausgabe. \\
+\code{FileManagerTest} & 3 &
+  Schreiben und Wiederlesen, fehlende Datei, fehlendes Verzeichnis. \\
+\code{PuzzleTest} & 19 &
+  Parsen von Kisten- und Bausteinzeilen (gültig/ungültig, Windows-Zeilenenden),
+  Lösen des Beispiels aus der Aufgabenstellung, Volumen zu groß/zu klein,
+  richtiges Volumen mit nicht passendem Teil, Wiederholbarkeit. \\
+\code{InvalidPuzzleFilesTest} & 2 &
+  Die Dateien \file{raetsel\_nicht\_lösbar.txt} und
+  \file{raetsel\_unvollständig.txt} werden vollständig eingelesen, als unlösbar
+  erkannt, und die Kiste bleibt bis auf den goldenen Würfel leer. \\
+\midrule
+\textbf{Summe} & \textbf{44} & \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Testergebnis}
+
+Beim letzten Testlauf (JDK~25.0.1) liefen \textbf{44 Tests}. Davon waren \textbf{41
+erfolgreich} und \textbf{3 fehlgeschlagen}. Alle drei Fehlschläge gehören zum
+parametrisierten Test \code{PuzzleTest.\allowbreak parseBrickString\_\allowbreak invalid\_\allowbreak throws}. Sie
+zeigen echte Lücken in der Eingabeprüfung von \code{Puzzle.parseBrickString}:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Eingabe} & \textbf{Beobachtetes Verhalten} \\
+\midrule
+\code{"0 1 1"} & Wird akzeptiert. Die Prüfung verlangt nur
+  \code{>= 0}, Kantenlängen von~0 werden also nicht abgelehnt. \\
+\code{"1 2"} & Wirft \code{ArrayIndexOutOfBoundsException} statt
+  \code{IllegalArgumentException}, weil die Anzahl der Werte nicht geprüft wird. \\
+\code{"1 2 3 4"} & Wird akzeptiert, der überzählige Wert wird stillschweigend
+  ignoriert. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Für die mitgelieferten Rätseldateien spielen diese Fälle keine Rolle. Sie sollten
+aber behoben werden, indem \code{parseBrickString} genau drei Werte $\geq 1$
+verlangt.
+
+\subsection{Anwendung auf alle Beispiele}
+\label{sec:ergebnisse}
+
+Das Programm wurde auf alle Beispieldateien angewendet. Die Laufzeiten stammen aus
+einem einzelnen Lauf auf einem Entwicklungsrechner (JDK~25, alle Rätsel nacheinander
+in derselben JVM) und sind nur als Größenordnung zu verstehen.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+\textbf{Datei} & \textbf{Kiste} & \textbf{Teile} & \textbf{Volumen} & \textbf{Ergebnis} & \textbf{Laufzeit} \\
+\midrule
+\file{raetsel1.txt} & $3^3$ & 8  & 26 / 26   & lösbar       & ca.\ 20\,ms \\
+\file{raetsel2.txt} & $3^3$ & 6  & 26 / 26   & lösbar       & < 10\,ms \\
+\file{raetsel3.txt} & $3^3$ & 6  & 26 / 26   & nicht lösbar & < 10\,ms \\
+\file{raetsel4.txt} & $5^3$ & 20 & 124 / 124 & lösbar       & ca.\ 3\,s \\
+\file{raetsel5.txt} (Dirk) & $5^3$ & 16 & 124 / 124 & lösbar & ca.\ 0{,}5\,s \\
+\file{raetsel\_nicht\_lösbar.txt}   & $3^3$ & 8 & 28 / 26 & nicht lösbar & < 1\,ms \\
+\file{raetsel\_unvollständig.txt}   & $3^3$ & 7 & 22 / 26 & nicht lösbar & < 1\,ms \\
+\bottomrule
+\end{tabular}
+\caption{Ergebnisse für alle Beispiele (Volumen: Summe der Teile / freie Zellen $n^3-1$)}
+\label{tab:ergebnisse}
+\end{table}
+
+\paragraph{Warum ist \file{raetsel3.txt} unlösbar?}
+Das Volumen stimmt, deshalb wird hier die vollständige Suche durchlaufen. Sie
+scheitert aus einem einfachen geometrischen Grund: Ein $2\times2\times2$-Würfel
+belegt in einer $3\times3\times3$-Kiste in jeder Achse die Koordinaten $\{0,1\}$ oder
+$\{1,2\}$. Er enthält also immer die Koordinate~1 in allen drei Achsen und damit die
+Mittelzelle $(1,1,1)$, in der der goldene Würfel liegt.
+
+\paragraph{Warum sind die beiden zusätzlichen Dateien unlösbar?}
+In \file{raetsel\_nicht\_lösbar.txt} sind die Teile zusammen zu groß (28 statt 26
+Zellen). Außerdem passt das Teil $1\times1\times4$ in keiner Lage in eine Kiste der
+Kantenlänge~3. In \file{raetsel\_unvollständig.txt} fehlen Teile, sodass vier Zellen
+leer bleiben würden. Beide Fälle erkennt die Volumenprüfung sofort.
+
+\subsubsection*{Lösung für Dirks Rätsel (\file{raetsel5.txt})}
+
+Darstellung Ebene für Ebene ($z = 0 \dots 4$). In jeder Ebene stehen die Zeilen für
+$y = 0 \dots 4$ und die Spalten für $x = 0 \dots 4$. Die Zahl ist die ID des Teils
+(0-basiert), \colorbox{goldcol}{\textbf{G}} ist der goldene Würfel. Die IDs 0 und
+13--15 sind die $1\times1\times1$-Würfel, 1--6 die $2\times2\times3$-Quader und 7--12
+die $1\times2\times4$-Quader.
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 0}}\\
+0 & 7 & 7 & 7 & 7\\
+8 & 7 & 7 & 7 & 7\\
+8 & 1 & 1 & 2 & 2\\
+8 & 1 & 1 & 2 & 2\\
+8 & 1 & 1 & 9 & 9\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 1}}\\
+10 & 10 & 3 & 3 & 3\\
+8 & 13 & 3 & 3 & 3\\
+8 & 1 & 1 & 2 & 2\\
+8 & 1 & 1 & 2 & 2\\
+8 & 1 & 1 & 9 & 9\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 2}}\\
+10 & 10 & 3 & 3 & 3\\
+4 & 4 & 3 & 3 & 3\\
+4 & 4 & \gold & 2 & 2\\
+5 & 5 & 5 & 2 & 2\\
+5 & 5 & 5 & 9 & 9\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 3}}\\
+10 & 10 & 6 & 6 & 11\\
+4 & 4 & 6 & 6 & 11\\
+4 & 4 & 6 & 6 & 11\\
+5 & 5 & 5 & 14 & 11\\
+5 & 5 & 5 & 9 & 9\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 4}}\\
+10 & 10 & 6 & 6 & 11\\
+4 & 4 & 6 & 6 & 11\\
+4 & 4 & 6 & 6 & 11\\
+12 & 12 & 12 & 12 & 11\\
+12 & 12 & 12 & 12 & 15\\
+\end{tabular}\hspace{0.9em}
+\end{center}
+
+\subsubsection*{Lösung für \file{raetsel4.txt}}
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 0}}\\
+19 & 16 & 5 & 1 & 1\\
+19 & 16 & 6 & 1 & 1\\
+19 & 17 & 18 & 18 & 18\\
+14 & 17 & 7 & 2 & 2\\
+14 & 8 & 9 & 2 & 2\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 1}}\\
+19 & 16 & 5 & 1 & 1\\
+19 & 16 & 6 & 1 & 1\\
+19 & 17 & 18 & 18 & 18\\
+14 & 17 & 7 & 2 & 2\\
+14 & 8 & 9 & 2 & 2\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 2}}\\
+19 & 16 & 5 & 10 & 11\\
+19 & 16 & 6 & 10 & 11\\
+19 & 17 & \gold & 10 & 11\\
+14 & 17 & 7 & 10 & 11\\
+14 & 8 & 9 & 10 & 11\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 3}}\\
+12 & 0 & 5 & 3 & 3\\
+12 & 0 & 6 & 3 & 3\\
+12 & 0 & 15 & 15 & 15\\
+12 & 0 & 7 & 4 & 4\\
+12 & 8 & 9 & 4 & 4\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccccc@{}}
+\multicolumn{5}{c}{\textbf{Ebene 4}}\\
+13 & 0 & 5 & 3 & 3\\
+13 & 0 & 6 & 3 & 3\\
+13 & 0 & 15 & 15 & 15\\
+13 & 0 & 7 & 4 & 4\\
+13 & 8 & 9 & 4 & 4\\
+\end{tabular}\hspace{0.9em}
+\end{center}
+
+\subsubsection*{Lösung für \file{raetsel1.txt}}
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 0}}\\
+4 & 5 & 5\\
+4 & 6 & 6\\
+0 & 6 & 6\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 1}}\\
+4 & 5 & 5\\
+4 & \gold & 7\\
+0 & 2 & 7\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 2}}\\
+1 & 1 & 1\\
+3 & 3 & 7\\
+0 & 2 & 7\\
+\end{tabular}\hspace{0.9em}
+\end{center}
+
+\subsubsection*{Lösung für \file{raetsel2.txt}}
+
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 0}}\\
+0 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 1}}\\
+4 & 4 & 4\\
+2 & \gold & 3\\
+5 & 5 & 5\\
+\end{tabular}\hspace{0.9em}
+\begin{tabular}[t]{@{}ccc@{}}
+\multicolumn{3}{c}{\textbf{Ebene 2}}\\
+1 & 1 & 1\\
+1 & 1 & 1\\
+1 & 1 & 1\\
+\end{tabular}\hspace{0.9em}
+\end{center}
+
+% =====================================================================
+\section{Fazit}
+% =====================================================================
+
+Das Programm erfüllt die Aufgabenstellung: Es füllt Dirks Kiste vollständig mit dem
+goldenen Würfel in der Mitte und findet die Lösung in etwa einer halben Sekunde. Es
+funktioniert auch für andere Kisten mit ungerader Kantenlänge und beliebige Mengen von
+Quadern. Für unlösbare Rätsel meldet es zuverlässig, dass es keine Lösung gibt.
+Dieses Ergebnis ist korrekt, weil das Backtracking alle Möglichkeiten erschöpfend
+prüft.
+
+\paragraph{Was gut funktioniert hat.}
+\begin{itemize}
+  \item Die Kombination aus Volumenprüfung, Gruppierung gleicher Teile,
+        doppelfreien Orientierungen und dem Füllen der jeweils ersten freien Zelle
+        hält den Suchraum klein. Ohne diese Maßnahmen wäre schon das
+        $5\times5\times5$-Rätsel praktisch nicht lösbar.
+  \item Die strikte Trennung von Fachlogik (\code{core}) und Oberfläche
+        (\code{visualizer}, MVC) hat die automatisierten Tests erst möglich gemacht
+        und hält die Klassen klein und verständlich.
+  \item Die 3D-Ansicht macht Lösungen deutlich leichter nachvollziehbar als die
+        Textausgabe, vor allem durch die Auswahl einzelner Bausteine.
+\end{itemize}
+
+\paragraph{Grenzen und Ausblick.}
+\begin{itemize}
+  \item Die Eingabedatei ist fest im Quelltext eingetragen. Sinnvoll wäre die Auswahl
+        per Kommandozeilenparameter oder Dateidialog in der Oberfläche.
+  \item Die Eingabeprüfung ist unvollständig. Die Anzahl $k$ in der zweiten Zeile
+        wird nicht mit der tatsächlichen Zahl der Teile verglichen, und
+        \code{parseBrickString} akzeptiert Kantenlängen von~0 sowie zu viele Werte
+        (siehe fehlgeschlagene Tests). Auch nicht würfelförmige Kisten werden nicht
+        gemeldet, sondern es wird nur die erste Kantenlänge verwendet.
+  \item \code{Box.removeBrick(brick, orientation, position)} gibt die Zellen frei,
+        entfernt den Baustein aber nicht vom Stapel \code{placedBricks}. Nach dem
+        Backtracking kann dieser Stapel deshalb Teile enthalten, die nicht mehr in
+        der Kiste liegen. Für das Ergebnis spielt das derzeit keine Rolle, weil der
+        Stapel nicht ausgewertet wird.
+  \item Für größere Kisten wächst die Laufzeit exponentiell. Zusätzliche
+        Abbruchkriterien würden helfen, etwa das Erkennen abgeschlossener
+        Hohlräume, deren Volumen sich mit den übrigen Teilen nicht füllen lässt. Ein
+        Ansatz dafür ist im Code bereits auskommentiert vorbereitet.
+  \item Die Textausgabe könnte an das in der Aufgabenstellung vorgeschlagene Format
+        (Ebenen nebeneinander, IDs ab~1) angepasst werden.
+\end{itemize}
+
+\end{document}

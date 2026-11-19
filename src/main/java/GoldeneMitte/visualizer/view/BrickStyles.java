@@ -8,9 +8,9 @@ import java.util.Map;
 public class BrickStyles {
     private static final double HUE_STEP_PER_ID = 137;
 
-    private final Map<Integer, BrickStyle> stylesByBrickId = new HashMap<>();
+    private static final Map<Integer, BrickStyle> stylesByBrickId = new HashMap<>();
 
-    public BrickStyle getBrickStyle(int brickId) {
+    public static BrickStyle getBrickStyle(int brickId) {
         return stylesByBrickId.computeIfAbsent(brickId, BrickStyles::createStyle);
     }
 
